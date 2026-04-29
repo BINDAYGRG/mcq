@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM7403 | 150+ Q&A Master Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- THEMES & VARIABLES --- */
+        :root[data-theme="light"] {
+            --bg-main: #f0f4f8; --bg-glass: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
+            --primary: #4f46e5; --secondary: #0f172a;
+            --text-main: #1e293b; --text-muted: #475569; --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); --success: #10b981; --warning: #f59e0b;
+        }
+        :root[data-theme="dark"] {
+            --bg-main: #0b0f19; --bg-glass: rgba(15, 23, 42, 0.85); --bg-card: #1e293b;
+            --primary: #6366f1; --secondary: #f8fafc;
+            --text-main: #f1f5f9; --text-muted: #cbd5e1; --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); --success: #34d399; --warning: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+
+        body { display: flex; height: 100vh; color: var(--text-main); overflow: hidden; background: var(--bg-main); background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 50%); }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 300px; background: var(--bg-glass); backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 20px; z-index: 100; }
+        .brand { text-align: center; margin-bottom: 20px; }
+        .brand h1 { font-size: 30px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;}
+        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+
+        .nav-menu { flex-grow: 1; overflow-y: auto; }
+        .nav-item { padding: 14px 20px; border-radius: 12px; color: var(--text-muted); font-weight: 600; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; display: flex; justify-content: space-between;}
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); transform: translateX(5px); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 20px -10px var(--primary); font-weight: 700; }
+        .nav-count { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 20px; font-size: 12px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+        .header-bar h2 { font-size: 32px; font-weight: 800; color: var(--secondary); }
+        
+        .controls { display: flex; gap: 15px; align-items: center; }
+        .search-bar { padding: 12px 20px; border-radius: 50px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-size: 16px; width: 300px; box-shadow: var(--shadow); outline: none;}
+        .search-bar:focus { border-color: var(--primary); }
+        
+        .btn { background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); padding: 12px 24px; border-radius: 50px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+        .btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        .btn-active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-active:hover { color: white; }
+
+        /* --- Q&A CARDS --- */
+        .qa-grid { display: flex; flex-direction: column; gap: 20px; }
+        .qa-card { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 30px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .qa-card:hover { border-color: var(--primary); }
+        
+        .qa-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .qa-cat { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .qa-num { color: var(--text-muted); font-weight: 800; font-size: 18px; }
+        
+        .qa-q { font-size: 22px; font-weight: 800; color: var(--secondary); margin-bottom: 20px; line-height: 1.4; }
+        
+        .qa-body { transition: 0.3s ease; }
+        .study-mode .qa-body { display: none; } /* Hidden in study mode */
+        .qa-card.revealed .qa-body { display: block; animation: fadeIn 0.4s ease; } /* Revealed when clicked in study mode */
+
+        .qa-a { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); padding: 15px 20px; border-radius: 8px; color: var(--success); font-weight: 700; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .qa-e { background: var(--bg-card); padding: 20px; border-radius: 12px; color: var(--text-main); font-size: 16px; line-height: 1.7; border: 1px solid var(--border); }
+        .qa-e strong { color: var(--primary); }
+
+        .reveal-hint { display: none; color: var(--primary); font-weight: 700; font-size: 14px; margin-top: 10px; cursor: pointer; }
+        .study-mode .reveal-hint { display: block; }
+        .study-mode .qa-card { cursor: pointer; }
+        .study-mode .qa-card.revealed .reveal-hint { display: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile */
+        .mobile-toggle { display: none; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; }
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; transition: 0.4s; }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .main-wrapper { padding: 20px; }
+            .search-bar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <h1>Q&A VAULT</h1>
+            <span>BM7403 • 150 Questions</span>
+        </div>
+        
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-item active" onclick="filterCat('All', this)">All Questions <span class="nav-count">150</span></div>
+            <div class="nav-item" onclick="filterCat('Week 1', this)">Week 1: Basics <span class="nav-count">15</span></div>
+            <div class="nav-item" onclick="filterCat('Week 2', this)">Week 2: Environment <span class="nav-count">20</span></div>
+            <div class="nav-item" onclick="filterCat('Week 3', this)">Week 3: Product <span class="nav-count">15</span></div>
+            <div class="nav-item" onclick="filterCat('Week 4', this)">Week 4: Culture <span class="nav-count">20</span></div>
+            <div class="nav-item" onclick="filterCat('Week 5&6', this)">Week 5/6: Entry Modes <span class="nav-count">20</span></div>
+            <div class="nav-item" onclick="filterCat('Week 7', this)">Week 7: Comms <span class="nav-count">15</span></div>
+            <div class="nav-item" onclick="filterCat('Week 8', this)">Week 8: Pricing <span class="nav-count">15</span></div>
+            <div class="nav-item" onclick="filterCat('Week 9', this)">Week 9: Research <span class="nav-count">15</span></div>
+            <div class="nav-item" onclick="filterCat('Case Studies', this)">Case Studies <span class="nav-count">15</span></div>
+        </div>
+    </div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="header-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menu</button>
+                <h2 id="pageTitle">All Questions</h2>
+            </div>
+            <div class="controls">
+                <input type="text" class="search-bar" id="searchInput" placeholder="Search questions, topics, or terms..." onkeyup="searchQs()">
+                            <button class="btn-theme" onclick="window.location.href='index.html'" style="margin-right: 10px;">🏠 Dashboard</button>
+
+                <button class="btn" id="studyBtn" onclick="toggleStudyMode()">🧠 Study Mode: OFF</button>
+                <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+            </div>
+        </div>
+
+        <div class="qa-grid" id="qaGrid">
+            </div>
+    </div>
+
+    <script>
+        // --- THE 150 Q&A DATABASE ---
+        const qaDatabase = [
+            // WEEK 1 (1-15)
+            { c: "Week 1", q: "What is the simplest definition of International Marketing according to Hollensen?", a: "Making marketing mix decisions across national boundaries.", e: "It takes the domestic 4Ps (Product, Price, Place, Promotion) and applies them across borders, adding immense complexity." },
+            { c: "Week 1", q: "What are the two main differences between domestic and international marketing?", a: "Heightened Complexity and Multidimensional factors.", e: "International marketers must deal with different currencies, languages, legal systems, and cultural norms simultaneously." },
+            { c: "Week 1", q: "What is 'Glocalization'?", a: "The strategy of 'Think Global, Act Local'.", e: "It balances the cost-saving benefits of global standardization with the consumer appeal of local adaptation." },
+            { c: "Week 1", q: "What is the primary benefit of Product Standardization?", a: "Economies of scale.", e: "Producing one identical product for the whole world massively reduces R&D, manufacturing, and marketing costs." },
+            { c: "Week 1", q: "What is the primary benefit of Product Adaptation?", a: "Higher local market relevance and legal compliance.", e: "Changing a product ensures it meets local cultural tastes and adheres to strict foreign safety/electrical laws." },
+            { c: "Week 1", q: "In the EPRG Framework, what does an 'Ethnocentric' approach mean?", a: "Applying the home-country standard to all foreign markets.", e: "The firm assumes what works at home will automatically work abroad without any changes." },
+            { c: "Week 1", q: "In the EPRG Framework, what is a 'Polycentric' approach?", a: "Giving each host country a highly adapted, unique strategy.", e: "Local managers are given total control to create products and ads specifically for their market." },
+            { c: "Week 1", q: "In the EPRG Framework, what is a 'Geocentric' approach?", a: "A world-oriented view targeting global segments.", e: "This is true glocalization—finding global similarities but respecting local differences." },
+            { c: "Week 1", q: "Why is 'Coordination' a major challenge in global marketing?", a: "Multinational branches may end up competing against each other.", e: "Without centralized strategy, a company's UK branch might cannibalize sales from its French branch." },
+            { c: "Week 1", q: "How does 'Administrative Distance' affect international marketing?", a: "It dictates the level of bureaucracy, corruption, and red tape.", e: "Expanding into countries with complex administrative procedures slows down entry and increases costs." },
+            { c: "Week 1", q: "What is 'Modularization' in international strategy?", a: "Standardizing internal components while adapting external designs.", e: "It is the manufacturing technique that allows glocalization to actually be profitable." },
+            { c: "Week 1", q: "True or False: International marketing faces less competition than domestic marketing.", a: "False.", e: "International markets expose firms to fierce global competitors as well as entrenched local incumbents." },
+            { c: "Week 1", q: "What is the ultimate goal of an International Strategic Marketing Plan?", a: "To create a sustainable competitive advantage across borders.", e: "Firms must navigate the global/local tension to outperform competitors long-term." },
+            { c: "Week 1", q: "Which approach is most prone to the Self-Reference Criterion bias?", a: "Ethnocentric.", e: "Because ethnocentric firms assume their home culture is superior or universal." },
+            { c: "Week 1", q: "What role does 'Infrastructure' play in the Week 1 challenges?", a: "It dictates physical distribution capabilities.", e: "A lack of paved roads or cold-chain storage limits how a physical product can be sold." },
+
+            // WEEK 2 (16-35)
+            { c: "Week 2", q: "What does PESTEL stand for?", a: "Political, Economic, Social, Technological, Environmental, Legal.", e: "It is a framework used to scan the uncontrollable macro-environment of a target country." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Currency Exchange Rates'?", a: "Economic.", e: "Fluctuating exchange rates directly impact a firm's pricing strategy and profit margins." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Urbanization and Demographics'?", a: "Social.", e: "Shifts in population age or lifestyle dictate what products consumers will desire." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Trade Embargoes and Expropriation'?", a: "Political.", e: "Government actions and instability pose severe risks to foreign investments." },
+            { c: "Week 2", q: "What is the primary purpose of Porter's Five Forces?", a: "To assess the attractiveness and profit potential of an industry.", e: "It evaluates the meso/micro environment (the direct competitive battlefield)." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what reduces the 'Threat of New Entrants'?", a: "High Barriers to Entry.", e: "Patents, massive capital requirements, and strict regulations keep new competitors out." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what increases 'Buyer Power'?", a: "When buyers purchase in massive volumes or switching costs are low.", e: "Large buyers can dictate terms and force suppliers to lower their prices." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what is a 'Substitute'?", a: "A product from a different industry that solves the same problem.", e: "For example, streaming services (Netflix) are a substitute for physical movie theaters." },
+            { c: "Week 2", q: "What is the purpose of Porter's Diamond of National Advantage?", a: "To explain why certain countries dominate specific global industries.", e: "It analyzes why nations like Germany excel at automotive engineering." },
+            { c: "Week 2", q: "In Porter's Diamond, what are 'Demand Conditions'?", a: "The presence of highly sophisticated, demanding local consumers.", e: "Demanding home buyers force local companies to innovate, making them globally competitive." },
+            { c: "Week 2", q: "In Porter's Diamond, what are 'Factor Conditions'?", a: "A nation's position in production factors like skilled labor and infrastructure.", e: "A country with top-tier research universities will naturally develop a strong biotech sector." },
+            { c: "Week 2", q: "In Porter's Diamond, what is the role of 'Related and Supporting Industries'?", a: "Providing a strong local supply chain.", e: "Having world-class parts suppliers nearby gives manufacturers a massive cost and speed advantage." },
+            { c: "Week 2", q: "What is the 'Value Chain'?", a: "A model describing the full range of activities needed to create a product.", e: "It splits activities into Primary (directly making/selling) and Support (HR, tech)." },
+            { c: "Week 2", q: "In the Value Chain, is 'Inbound Logistics' a Primary or Support activity?", a: "Primary.", e: "It directly involves receiving, warehousing, and managing inventory." },
+            { c: "Week 2", q: "In the Value Chain, is 'Human Resources' a Primary or Support activity?", a: "Support.", e: "HR facilitates the primary activities by hiring and training staff." },
+            { c: "Week 2", q: "How do 'Tariffs' impact the international environment?", a: "They artificially raise the price of imported goods.", e: "Governments use tariffs to protect domestic industries from foreign competition." },
+            { c: "Week 2", q: "What does 'Expropriation' mean in a Political risk context?", a: "A government seizing foreign-owned assets without fair compensation.", e: "This is the ultimate political risk for firms investing heavily in unstable regions." },
+            { c: "Week 2", q: "How does high 'Competitive Rivalry' affect an industry?", a: "It drives prices down and squeezes profit margins.", e: "When many firms fight for the same customers, the industry becomes less attractive." },
+            { c: "Week 2", q: "In a SWOT analysis, where do PESTEL factors belong?", a: "Opportunities and Threats.", e: "SWOT (Strengths/Weaknesses) are internal; (Opportunities/Threats) are external environment factors." },
+            { c: "Week 2", q: "True or False: A strong domestic rivalry hurts a firm's global chances.", a: "False.", e: "Porter's Diamond states that fierce domestic competition forces firms to become strong enough to win globally." },
+
+            // WEEK 3 (36-50)
+            { c: "Week 3", q: "What is the 'Core Product'?", a: "The fundamental benefit or problem-solving service.", e: "You don't buy a drill; you buy 'the ability to make a hole'." },
+            { c: "Week 3", q: "What is the 'Actual Product'?", a: "The physical attributes, packaging, and brand name.", e: "This is the tangible item you hold in your hands." },
+            { c: "Week 3", q: "What is the 'Augmented Product'?", a: "After-sales service, warranties, and delivery.", e: "These are the non-physical add-ons that increase total customer value." },
+            { c: "Week 3", q: "What is 'Mandatory Adaptation'?", a: "Product changes dictated by law or absolute geographical need.", e: "Changing a plug from 110v to 220v so it legally works in Europe." },
+            { c: "Week 3", q: "What is 'Discretionary (Optional) Adaptation'?", a: "Changes made to better align with local tastes.", e: "Changing the flavor of a snack chip to suit local palates to increase sales." },
+            { c: "Week 3", q: "What is the 'Country of Origin (COO) Effect'?", a: "The psychological bias where consumers judge quality based on where an item was made.", e: "'Swiss Made' implies precision; 'Made in Italy' implies high fashion." },
+            { c: "Week 3", q: "Can the COO effect be negative?", a: "Yes.", e: "If a country has a reputation for poor manufacturing or unsafe labor, consumers will avoid those products." },
+            { c: "Week 3", q: "What is 'Product Invention'?", a: "Creating an entirely new product from scratch for a foreign market.", e: "Used when extending or adapting a home-country product simply will not work." },
+            { c: "Week 3", q: "How do 'Consumer Income Levels' dictate product decisions?", a: "Firms must often strip down products to make them affordable in developing nations.", e: "A luxury car brand might remove premium features to lower the entry price point in India." },
+            { c: "Week 3", q: "What is 'Product Extension'?", a: "Selling the exact same product abroad as at home.", e: "Highly cost-effective but risks failing if local tastes differ significantly." },
+            { c: "Week 3", q: "What is a 'Product Line Extension'?", a: "Adding new variations to an existing product category.", e: "LEGO launching 'LEGO Friends' to capture the female demographic." },
+            { c: "Week 3", q: "What does 'Ease of Distribution' refer to in product policy?", a: "The physical infrastructure available to move the product.", e: "If a country lacks cold-chain trucks, you cannot sell frozen foods there." },
+            { c: "Week 3", q: "Why is 'Brand Equity' important for products?", a: "It allows companies to launch new products with instant consumer trust.", e: "Swiss Army used its knife's equity to successfully sell watches." },
+            { c: "Week 3", q: "What is a 'Global Brand'?", a: "A brand that uses the same name, logo, and positioning worldwide.", e: "Apple and Coca-Cola rely on global brand recognition." },
+            { c: "Week 3", q: "Why might packaging need adaptation?", a: "Language laws, recycling regulations, or cultural color associations.", e: "White represents mourning in some Asian cultures, making it bad for festive packaging." },
+
+            // WEEK 4 (51-70)
+            { c: "Week 4", q: "How do Schiffman and Kanuk define Culture?", a: "The sum total of learned beliefs, values, and customs directing behavior.", e: "Culture acts as the operating system or 'personality' of a society." },
+            { c: "Week 4", q: "What is the 'Self-Reference Criterion (SRC)'?", a: "The unconscious tendency to judge foreign markets by your own cultural values.", e: "It is the biggest trap in marketing, causing firms to launch offensive or confusing ads." },
+            { c: "Week 4", q: "What is 'Ethnocentrism' in a cultural context?", a: "The belief that one's own culture is superior to others.", e: "It causes managers to arrogantly ignore local market realities." },
+            { c: "Week 4", q: "Which framework is the gold standard for cross-cultural analysis?", a: "Hofstede’s Cultural Dimensions.", e: "It provides a quantifiable way to compare cultural values." },
+            { c: "Week 4", q: "In Hofstede's framework, what is 'Power Distance (PDI)'?", a: "The degree to which unequal distribution of power is accepted.", e: "High PDI cultures respect strict hierarchy and titles without question." },
+            { c: "Week 4", q: "What is 'Individualism vs. Collectivism'?", a: "Focus on the 'I' (self-reliance) versus the 'We' (group harmony).", e: "In collectivist cultures, ads should appeal to family and community benefit." },
+            { c: "Week 4", q: "What is 'Masculinity vs. Femininity' in Hofstede's model?", a: "Preference for achievement/material success vs. caring/quality of life.", e: "Masculine cultures respond well to status symbols and aggressive competition." },
+            { c: "Week 4", q: "What is 'Uncertainty Avoidance (UAI)'?", a: "A society's tolerance for ambiguity and risk.", e: "High UAI cultures hate the unknown and demand strict rules, details, and warranties." },
+            { c: "Week 4", q: "What defines a 'High-Context' culture?", a: "Communication relies heavily on non-verbal cues and relationships.", e: "In Japan or Saudi Arabia, the context (who is speaking) matters more than the literal words." },
+            { c: "Week 4", q: "What defines a 'Low-Context' culture?", a: "Communication is direct, explicit, and literal.", e: "In the USA or Germany, business is done via direct facts and written contracts." },
+            { c: "Week 4", q: "Why is humor dangerous in cross-cultural advertising?", a: "Humor is highly subjective and bound by cultural context.", e: "A sarcastic joke in the UK might be deeply offensive or simply confusing in China." },
+            { c: "Week 4", q: "How does religion impact international marketing?", a: "It dictates consumption taboos, holidays, and gender roles.", e: "Selling alcohol or pork in Islamic nations is strictly prohibited by religious law." },
+            { c: "Week 4", q: "What is 'Back-Translation'?", a: "Translating text into a foreign language, then having a different person translate it back.", e: "It is essential to ensure that cultural nuance and meaning are not lost." },
+            { c: "Week 4", q: "Why does IKEA adapt its catalog imagery globally?", a: "To reflect local living spaces, cultural norms, and family dynamics.", e: "Japanese catalogs show smaller rooms; Saudi catalogs adhere to local modesty norms." },
+            { c: "Week 4", q: "How do aesthetics (colors/symbols) affect marketing?", a: "Colors have different meanings across cultures.", e: "Red means danger in the West, but luck and prosperity in China." },
+            { c: "Week 4", q: "What is 'Acculturation'?", a: "The process of learning a new or foreign culture.", e: "Marketers must undergo acculturation to successfully navigate foreign markets." },
+            { c: "Week 4", q: "If an ad focuses on personal rebellion, what culture does it target?", a: "High Individualism.", e: "Rebellion appeals to individual expression, not group harmony." },
+            { c: "Week 4", q: "How does high Uncertainty Avoidance affect product launches?", a: "Consumers are slow to adopt new innovations.", e: "Marketers must offer free trials or ironclad guarantees to lower perceived risk." },
+            { c: "Week 4", q: "Is 'Psychic Distance' one of Hofstede's dimensions?", a: "No.", e: "Psychic Distance relates to market entry strategy, not core cultural values." },
+            { c: "Week 4", q: "What is 'Cultural Imperative'?", a: "Customs that must be recognized and accommodated to do business.", e: "E.g., exchanging business cards with two hands in Japan." },
+
+            // WEEKS 5 & 6 (71-90)
+            { c: "Week 5&6", q: "What does the MACS Matrix stand for?", a: "Market Attractiveness / Competitive Strength.", e: "It is a quantitative tool used to score and prioritize which foreign markets to enter." },
+            { c: "Week 5&6", q: "In the MACS Matrix, what variables define 'Market Attractiveness'?", a: "Market size, GDP growth, and political stability.", e: "These are the external factors that make a country a lucrative target." },
+            { c: "Week 5&6", q: "In the MACS Matrix, what variables define 'Competitive Strength'?", a: "Brand awareness, local network, and capital resources.", e: "These are the internal factors that determine if the firm can actually win in that market." },
+            { c: "Week 5&6", q: "What is 'Psychic Distance'?", a: "The perceived differences in culture, language, and business practices.", e: "SMEs prefer low psychic distance (e.g., UK expanding to Australia) to reduce fear." },
+            { c: "Week 5&6", q: "Does low Geographic Distance always mean low Psychic Distance?", a: "No.", e: "The US and Mexico are physically touching, but possess high psychic (cultural/language) distance." },
+            { c: "Week 5&6", q: "What is the 'Opportunistic Approach' to market selection?", a: "Entering markets based on unsolicited orders or familiar neighbors.", e: "Often used by SMEs who lack the budget for full MACS Matrix screening." },
+            { c: "Week 5&6", q: "What is the Entry Mode risk/control continuum?", a: "The principle that higher control over a market requires higher financial risk.", e: "Exporting has no risk but no control; FDI has total control but massive risk." },
+            { c: "Week 5&6", q: "What is 'Indirect Exporting'?", a: "Selling to a domestic intermediary who handles the foreign export.", e: "The absolute lowest risk mode, requiring zero international expertise from the manufacturer." },
+            { c: "Week 5&6", q: "What is 'Direct Exporting'?", a: "The manufacturer handles the shipping and sells directly to foreign distributors.", e: "Requires more internal expertise but yields higher profit margins than indirect exporting." },
+            { c: "Week 5&6", q: "What is 'Licensing'?", a: "Granting a foreign entity the right to use Intellectual Property for a royalty fee.", e: "Monetizes patents/brands without capital risk, but risks creating a future competitor." },
+            { c: "Week 5&6", q: "How does 'Franchising' differ from Licensing?", a: "Franchising includes strict operational rules and ongoing support.", e: "McDonalds franchises its brand, forcing local owners to adhere to exact cooking and cleaning standards." },
+            { c: "Week 5&6", q: "What is a 'Joint Venture (JV)'?", a: "Two companies sharing equity to create a brand new, third corporate entity.", e: "Allows sharing of costs and local knowledge, but frequently fails due to management clashes." },
+            { c: "Week 5&6", q: "What is a 'Strategic Alliance'?", a: "A contractual partnership that does NOT create a new legal entity.", e: "Firms collaborate on a specific project (like R&D) while remaining totally independent." },
+            { c: "Week 5&6", q: "What is 'Foreign Direct Investment (FDI)'?", a: "Buying or building physical facilities in the host country.", e: "Also known as a Wholly Owned Subsidiary." },
+            { c: "Week 5&6", q: "What is a 'Greenfield Investment'?", a: "A type of FDI where a firm builds operations from scratch (an empty field).", e: "It offers a clean slate but takes years to build." },
+            { c: "Week 5&6", q: "What is an 'Acquisition'?", a: "A type of FDI where a firm buys an existing local company.", e: "Provides instant market share and local staff, but comes with integration headaches." },
+            { c: "Week 5&6", q: "What is 'Transaction Cost Analysis (TCA)'?", a: "A theory stating firms should use FDI if the cost of monitoring external agents is too high.", e: "If partners are likely to steal your secrets, it's cheaper to just own the factory yourself." },
+            { c: "Week 5&6", q: "What is a 'Born Global' firm?", a: "A company that targets international markets from its inception.", e: "Often tech startups that skip the traditional slow domestic growth phase." },
+            { c: "Week 5&6", q: "What is the 'Psychic Distance Paradox'?", a: "Firms failing in culturally similar markets due to arrogant carelessness.", e: "Assuming the UK and USA are identical leads to disastrous marketing missteps." },
+            { c: "Week 5&6", q: "Why might a government force a foreign firm to use a Joint Venture?", a: "To protect local industries and ensure technology transfer.", e: "China historically required JVs so local firms could learn Western manufacturing techniques." },
+
+            // WEEK 7 (91-105)
+            { c: "Week 7", q: "What are the components of the Communication Model?", a: "Sender -> Encoding -> Media Channel -> Decoding -> Receiver.", e: "The Sender's intended message must survive the journey to be understood by the Receiver." },
+            { c: "Week 7", q: "In communication, what is 'Noise'?", a: "Any interference that distorts the message.", e: "Cultural taboos, bad translations, or competitor ads distracting the consumer." },
+            { c: "Week 7", q: "What is 'Standardized Communication'?", a: "Using the exact same advertising campaign globally.", e: "It builds a unified brand and saves millions in agency fees." },
+            { c: "Week 7", q: "What is 'Adapted Communication'?", a: "Customizing the ad to fit local humor, actors, and values.", e: "Required when a global message would be misunderstood or illegal." },
+            { c: "Week 7", q: "Can a firm standardize the product but adapt the communication?", a: "Yes.", e: "The 'Laughing Cow' cheese is identical globally, but TV ads are customized for every country." },
+            { c: "Week 7", q: "What is a 'Push' Strategy?", a: "Focusing marketing efforts on channel intermediaries.", e: "Using trade discounts and sales reps to 'push' wholesalers into stocking the product." },
+            { c: "Week 7", q: "What is a 'Pull' Strategy?", a: "Focusing heavily on mass media advertising to the end-consumer.", e: "Creating consumer desire so they go to the store and 'pull' the product through the channel." },
+            { c: "Week 7", q: "Why do media regulations matter in international communication?", a: "Countries have different laws on what can be advertised.", e: "Some nations ban TV ads for children's toys, alcohol, or pharmaceuticals." },
+            { c: "Week 7", q: "How does media availability affect communication?", a: "Not all countries have the same infrastructure.", e: "You cannot run a heavy YouTube campaign in a country with low internet penetration." },
+            { c: "Week 7", q: "What is the danger of using international celebrities in ads?", a: "A celebrity beloved in the US might be unknown or disliked in Asia.", e: "Endorsements rarely cross borders perfectly unless it is a massive global sports star." },
+            { c: "Week 7", q: "What does HSBC's 'The World's Local Bank' mean?", a: "It is a glocalized communication strategy.", e: "It promises the safety of a global megabank with the personalized touch of a local branch." },
+            { c: "Week 7", q: "What is 'Decoding' in the communication model?", a: "How the consumer interprets the message.", e: "If the consumer decodes the message differently than the sender intended, the ad fails." },
+            { c: "Week 7", q: "Why is language translation not enough for global ads?", a: "Idioms and cultural contexts do not translate literally.", e: "'Finger lickin' good' translated poorly in China, sounding like 'eat your fingers off'." },
+            { c: "Week 7", q: "How does literacy rate affect communication?", a: "In low-literacy areas, marketers must use visual/audio channels like radio or billboards.", e: "Heavy text-based print ads will fail." },
+            { c: "Week 7", q: "What is 'Pattern Advertising'?", a: "A global theme with localized execution.", e: "The core concept is the same, but local actors and voices are used." },
+
+            // WEEK 8 (106-120)
+            { c: "Week 8", q: "Why is Pricing unique in the marketing mix?", a: "It is the only 'P' that generates revenue; the rest generate costs.", e: "Pricing directly dictates profit margins and market positioning." },
+            { c: "Week 8", q: "What is 'Price Escalation'?", a: "The disproportionate increase in the retail price of exported goods.", e: "Accumulated tariffs, shipping, and middleman margins make cheap items expensive abroad." },
+            { c: "Week 8", q: "How can a firm combat Price Escalation?", a: "By manufacturing locally (FDI).", e: "Building a factory inside the target country bypasses import tariffs and international shipping." },
+            { c: "Week 8", q: "What is 'Transfer Pricing'?", a: "The internal price charged between affiliated subsidiaries across borders.", e: "Multinationals manipulate this to shift profits from high-tax countries to low-tax countries." },
+            { c: "Week 8", q: "Why do governments scrutinize Transfer Pricing?", a: "To prevent tax evasion.", e: "Governments want their fair share of tax revenue generated within their borders." },
+            { c: "Week 8", q: "What is the 'Grey Market' (Parallel Importing)?", a: "Unauthorized distributors exploiting cross-border price differences.", e: "Buying cheap authentic goods in Country A and selling them in Country B, undercutting the brand." },
+            { c: "Week 8", q: "What causes Grey Markets to form?", a: "Large price discrepancies between countries for the exact same product.", e: "When a firm uses extreme Polycentric pricing, smugglers exploit the gap." },
+            { c: "Week 8", q: "What is 'Ethnocentric Pricing'?", a: "Setting one universal global price based on the home country.", e: "Often fails because it ignores local purchasing power and competition." },
+            { c: "Week 8", q: "What is 'Polycentric Pricing'?", a: "Allowing local managers total autonomy to set prices.", e: "Maximizes local competitiveness but inevitably creates Grey Markets." },
+            { c: "Week 8", q: "What is 'Geocentric Pricing'?", a: "A strategic baseline global price with coordinated local adjustments.", e: "The best approach; it balances local realities while minimizing grey market risks." },
+            { c: "Week 8", q: "What is 'Market Skimming'?", a: "Setting a high initial price to target early adopters, then lowering it later.", e: "Used to quickly recoup R&D costs (e.g., Apple iPhones)." },
+            { c: "Week 8", q: "What is 'Market Penetration' Pricing?", a: "Setting a low initial price to rapidly capture massive market share.", e: "Drives competitors away but sacrifices short-term profit margins." },
+            { c: "Week 8", q: "What is 'Dumping'?", a: "Selling goods abroad below the cost of production to destroy local competition.", e: "It is a predatory practice heavily penalized by the World Trade Organization." },
+            { c: "Week 8", q: "How do Currency Exchange Rates affect pricing?", a: "If the local currency crashes, your profit margins disappear.", e: "Firms must constantly adjust prices or use hedging to survive currency volatility." },
+            { c: "Week 8", q: "What is 'Cost-Plus' pricing?", a: "Adding a standard markup to the cost of manufacturing.", e: "Simple, but ignores consumer demand and competitor pricing." },
+
+            // WEEK 9 (121-135)
+            { c: "Week 9", q: "What is the primary purpose of Global Market Research?", a: "To identify opportunities and mitigate the financial risk of expansion.", e: "Operating blindly in foreign markets almost guarantees failure." },
+            { c: "Week 9", q: "What is 'Secondary Data'?", a: "Pre-existing data collected for another purpose.", e: "Government census, trade reports, and industry articles." },
+            { c: "Week 9", q: "Why should a firm always start with Secondary Data?", a: "It is fast, cheap, and readily available.", e: "Never pay for custom research until you have exhausted the free public data." },
+            { c: "Week 9", q: "What is a major limitation of Secondary Data?", a: "It may be outdated or lack specific relevance.", e: "A national census won't tell you if consumers like the specific taste of your new soda." },
+            { c: "Week 9", q: "What is 'Primary Data'?", a: "Original research collected specifically for the problem at hand.", e: "Surveys, focus groups, and observational research." },
+            { c: "Week 9", q: "What is the main drawback of Primary Data?", a: "It is highly expensive and time-consuming.", e: "Running a 5,000-person survey in a foreign language requires massive budgets." },
+            { c: "Week 9", q: "What is 'Conceptual Equivalence' in research?", a: "Ensuring that concepts map correctly across cultures.", e: "Asking about 'Family' might mean nuclear family in the US, but an extended tribe in Africa." },
+            { c: "Week 9", q: "Why is 'Sampling' difficult in developing nations?", a: "Lack of infrastructure.", e: "Without reliable census lists, street addresses, or widespread internet, random sampling is impossible." },
+            { c: "Week 9", q: "What is 'Observational Research'?", a: "Watching consumers interact with products in their natural environment.", e: "Highly useful in cultures where people are too polite to give negative feedback on a survey." },
+            { c: "Week 9", q: "How do you solve Translation Errors in surveys?", a: "By using Back-Translation.", e: "Translate English to Mandarin, then have a second person translate the Mandarin back to English to check for errors." },
+            { c: "Week 9", q: "What is 'Quantitative' Research?", a: "Data that can be measured numerically (statistics).", e: "Surveys with 1-10 scales providing hard numbers." },
+            { c: "Week 9", q: "What is 'Qualitative' Research?", a: "Data that explores underlying reasons and motivations.", e: "Focus groups and deep interviews providing rich, word-based insights." },
+            { c: "Week 9", q: "Why might focus groups fail in High Power Distance cultures?", a: "Subordinates will not speak up or disagree if a senior person is in the room.", e: "Social hierarchy stifles honest, open debate." },
+            { c: "Week 9", q: "What is 'Social Desirability Bias'?", a: "Respondents answering questions in a way they think will be viewed favorably.", e: "People often lie on surveys to look good to the researcher." },
+            { c: "Week 9", q: "Why must legal privacy laws be researched?", a: "Data collection laws vary drastically.", e: "The EU's GDPR strictly limits how you can collect and store consumer data compared to the US." },
+
+            // CASE STUDIES & TRENDS (136-150)
+            { c: "Case Studies", q: "In the Electrolux case, what is 'Modularization'?", a: "Standardizing internal technical subsystems while customizing exterior designs.", e: "This allows massive economies of scale while meeting local consumer tastes." },
+            { c: "Case Studies", q: "Why did LEGO launch the 'LEGO Friends' line?", a: "To capture the underserved female demographic.", e: "They used primary research to realize young girls wanted construction toys focused on social scenarios." },
+            { c: "Case Studies", q: "Why does LEGO retain core manufacturing in-house?", a: "To maintain strict quality control and brand prestige.", e: "Outsourcing cheap plastic could ruin the precision required for their bricks." },
+            { c: "Case Studies", q: "How did McCain respond to the socio-cultural trend of health awareness?", a: "By changing their recipe to sunflower oil and running educational ad campaigns.", e: "They adapted both the Actual Product and the Communication to survive the PESTEL shift." },
+            { c: "Case Studies", q: "What matrix did Bosch use to evaluate expansion into the Middle East?", a: "The MACS Matrix.", e: "They systematically scored market attractiveness against their own competitive strength." },
+            { c: "Case Studies", q: "How did Swiss Army successfully expand into watches and luggage?", a: "By leveraging their immense Brand Equity.", e: "Consumers trusted the knife's durability, so they instantly trusted the new products." },
+            { c: "Case Studies", q: "Swiss Army's success relies heavily on which psychological bias?", a: "The Country of Origin (COO) Effect.", e: "'Swiss Made' is a global shorthand for premium precision engineering." },
+            { c: "Case Studies", q: "What is the main danger highlighted in the E-Bikes in China case?", a: "Translating Western surveys directly without understanding local laws and contexts.", e: "Chinese law strictly caps e-bike speeds; Western surveys asking about 'highway commuting' are irrelevant." },
+            { c: "Trends", q: "In the Deloitte Trends report, what does 'Agility' mean?", a: "The structural flexibility to rapidly change the marketing playbook.", e: "Post-pandemic, firms must be able to pivot messaging and channels instantly." },
+            { c: "Trends", q: "What is the Deloitte 'Purpose' trend?", a: "Organizations knowing their core 'Why' beyond making a profit.", e: "Purpose acts as a North Star during crises, guiding authentic decisions." },
+            { c: "Trends", q: "What is the Deloitte 'Trust' trend?", a: "Demonstrating both the intent (empathy) and the competence to deliver.", e: "Trust requires humanity plus the operational ability to get the job done." },
+            { c: "Trends", q: "What is the Deloitte 'Participation' trend?", a: "Moving consumers from passive buyers to active co-creators.", e: "Inviting users to be brand ambassadors and influence product development." },
+            { c: "Trends", q: "What is the Deloitte 'Fusion' trend?", a: "Creating new ecosystems via cross-industry partnerships.", e: "Breaking down traditional silos to better serve holistic human needs." },
+            { c: "Synthesis", q: "A UK hospitality brand settles foreign domain invoices in USDT. What risk are they hedging?", a: "Economic (Currency/Exchange) Risk.", e: "Using a stable digital currency protects against fiat currency devaluation." },
+            { c: "Synthesis", q: "A warehouse operative notices huge tariff costs on imported goods. What concept is this?", a: "Price Escalation.", e: "The practical, logistical reality of cross-border taxes multiplying the final cost." }
+        ];
+
+        // --- ENGINE LOGIC ---
+        let currentMode = 'study'; // 'study' or 'test'
+
+        function init() {
+            renderQs(qaDatabase);
+            document.getElementById('navMenu').children[0].classList.add('active');
+        }
+
+        function renderQs(data) {
+            const grid = document.getElementById('qaGrid');
+            grid.innerHTML = '';
+            
+            if(data.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-size: 20px;">No questions found matching your search.</div>';
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'qa-card';
+                
+                // Add click listener for study mode reveal
+                card.onclick = function() {
+                    if(document.body.classList.contains('study-mode')) {
+                        this.classList.add('revealed');
+                    }
+                };
+
+                card.innerHTML = `
+                    <div class="qa-header">
+                        <span class="qa-cat">${item.c}</span>
+                        <span class="qa-num">#${index + 1}</span>
+                    </div>
+                    <div class="qa-q">${item.q}</div>
+                    <div class="reveal-hint">👁️ Click to reveal answer</div>
+                    <div class="qa-body">
+                        <div class="qa-a">✓ ${item.a}</div>
+                        <div class="qa-e"><strong>The "Why":</strong> ${item.e}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            document.getElementById('pageTitle').innerText = `${data.length} Questions Displayed`;
+        }
+
+        function filterCat(category, el) {
+            // Update Active Class
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Clear search
+            document.getElementById('searchInput').value = '';
+
+            // Filter
+            if (category === 'All') {
+                renderQs(qaDatabase);
+            } else if (category === 'Week 5&6') {
+                const filtered = qaDatabase.filter(q => q.c === 'Week 5&6');
+                renderQs(filtered);
+            } else {
+                const filtered = qaDatabase.filter(q => q.c.includes(category));
+                renderQs(filtered);
+            }
+            
+            // Close mobile menu
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('mainWrapper').scrollTo(0,0);
+        }
+
+        function searchQs() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            // Remove active state from sidebar
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const filtered = qaDatabase.filter(q => 
+                q.q.toLowerCase().includes(term) || 
+                q.a.toLowerCase().includes(term) || 
+                q.c.toLowerCase().includes(term) || 
+                q.e.toLowerCase().includes(term)
+            );
+            renderQs(filtered);
+        }
+
+        function toggleStudyMode() {
+            const btn = document.getElementById('studyBtn');
+            const body = document.body;
+            
+            if (body.classList.contains('study-mode')) {
+                body.classList.remove('study-mode');
+                btn.classList.remove('btn-active');
+                btn.innerText = "🧠 Study Mode: OFF";
+                // remove revealed class from all
+                document.querySelectorAll('.qa-card').forEach(c => c.classList.remove('revealed'));
+            } else {
+                body.classList.add('study-mode');
+                btn.classList.add('btn-active');
+                btn.innerText = "🧠 Study Mode: ON";
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.innerText = '🌙 Dark';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerText = '☀️ Light';
+            }
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

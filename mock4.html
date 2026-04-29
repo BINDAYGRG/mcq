@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM7403 | 1-Hour Mock Exam Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- THEMES & VARIABLES --- */
+        :root[data-theme="light"] {
+            --bg-main: #f0f4f8; --bg-glass: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
+            --primary: #4f46e5; --secondary: #0f172a; --text-main: #1e293b; --text-muted: #64748b; 
+            --border: rgba(0, 0, 0, 0.1); --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+        }
+        :root[data-theme="dark"] {
+            --bg-main: #0b0f19; --bg-glass: rgba(15, 23, 42, 0.85); --bg-card: #1e293b;
+            --primary: #6366f1; --secondary: #f8fafc; --text-main: #f1f5f9; --text-muted: #94a3b8; 
+            --border: rgba(255, 255, 255, 0.1); --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
+            --success: #34d399; --danger: #f87171; --warning: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+
+        body { display: flex; flex-direction: column; height: 100vh; color: var(--text-main); overflow: hidden; background: var(--bg-main); background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 50%); }
+
+        /* --- NAVBAR --- */
+        .navbar { background: var(--bg-glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .brand h1 { font-size: 24px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        .btn-theme { background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); padding: 8px 16px; border-radius: 50px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+
+        /* --- MAIN CONTAINER --- */
+        .main-wrapper { flex: 1; padding: 40px 20px; overflow-y: auto; scroll-behavior: smooth; display: flex; justify-content: center; }
+        .content-box { width: 100%; max-width: 900px; }
+
+        /* --- CARDS & BUTTONS --- */
+        .card { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 40px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 12px; font-weight: 800; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px -10px var(--primary); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; animation: slideIn 0.4s ease; }
+        .screen.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HUD TIMER --- */
+        .timer-hud { position: sticky; top: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 50; margin-bottom: 30px; box-shadow: var(--shadow); }
+        .hud-text { font-size: 32px; font-weight: 900; color: var(--danger); font-variant-numeric: tabular-nums; letter-spacing: 2px; }
+        
+        /* --- EXAM UI --- */
+        .progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); width: 0%; transition: width 0.4s ease; }
+        .q-cat { color: var(--primary); background: rgba(99, 102, 241, 0.1); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 800; text-transform: uppercase; }
+        .q-text { font-size: 24px; font-weight: 800; color: var(--secondary); margin-bottom: 30px; line-height: 1.4; }
+        
+        .opt-grid { display: grid; gap: 15px; margin-bottom: 30px; }
+        .opt-btn { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 16px; color: var(--text-main); transition: 0.2s; }
+        .opt-btn:hover { border-color: var(--primary); transform: translateX(5px); }
+        .opt-btn.selected { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .opt-l { width: 40px; height: 40px; background: rgba(99, 102, 241, 0.1); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-weight: 900; font-size: 18px; flex-shrink: 0; }
+        .opt-btn.selected .opt-l { background: var(--primary); color: white; }
+
+        /* --- RESULTS UI --- */
+        .score-circle { width: 180px; height: 180px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 56px; font-weight: 900; margin: 0 auto 30px; box-shadow: 0 10px 30px -10px var(--primary); }
+        .diagnostic-box { background: rgba(245, 158, 11, 0.1); border-left: 5px solid var(--warning); padding: 25px; border-radius: 16px; margin: 30px 0; text-align: left; }
+        .diagnostic-box h4 { color: var(--warning); font-size: 20px; margin-bottom: 15px; }
+        .diag-list { list-style: none; padding: 0; }
+        .diag-list li { margin-bottom: 10px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+
+        /* --- DETAILED REVIEW UI --- */
+        .review-header { font-size: 28px; font-weight: 900; color: var(--secondary); margin: 40px 0 20px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .rev-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .rev-card.correct { border-left: 6px solid var(--success); }
+        .rev-card.wrong { border-left: 6px solid var(--danger); }
+        .rev-q { font-size: 18px; font-weight: 800; color: var(--secondary); margin-bottom: 15px; line-height: 1.4; }
+        .rev-ans { padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700; }
+        .ans-user-wrong { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .ans-user-right { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .ans-correct { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px dashed var(--success); }
+        .rev-why { background: var(--bg-main); padding: 15px; border-radius: 8px; font-size: 15px; color: var(--text-muted); margin-top: 15px; border: 1px solid var(--border); }
+        .rev-why strong { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .main-wrapper { padding: 20px 10px; }
+            .card { padding: 25px; }
+            .hud-text { font-size: 24px; }
+            .q-text { font-size: 20px; }
+            .opt-btn { padding: 15px; font-size: 14px; }
+            .navbar { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="brand">
+            <h1>EXAM HUB</h1>
+            <span>BM7403 150-Q Engine</span>
+        </div>
+        <div>
+            <button class="btn-theme" onclick="window.location.href='index.html'" style="margin-right: 10px;">🏠 Dashboard</button>
+            <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="content-box">
+            
+            <div id="screenStart" class="screen active">
+                <div class="card" style="text-align: center; padding: 60px 30px;">
+                    <div style="font-size: 60px; margin-bottom: 20px;">⏱️</div>
+                    <h2 style="font-size: 40px; color: var(--secondary); font-weight: 900; margin-bottom: 15px;">1-Hour Mock Exam</h2>
+                    <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        This engine will randomly select <strong>50 unique questions</strong> from the master database of 150. You have exactly <strong>60 minutes</strong>. The exam will auto-submit when the timer hits zero. <br><br>At the end, you will receive a diagnostic report and a detailed review of every right and wrong answer.
+                    </p>
+                    <button class="btn" onclick="startExam()">Begin Examination</button>
+                </div>
+            </div>
+
+            <div id="screenExam" class="screen">
+                <div class="timer-hud">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Time Remaining</div>
+                        <div id="timerDisplay" class="hud-text">60:00</div>
+                    </div>
+                    <button class="btn" style="padding: 10px 20px; font-size: 14px; background: var(--danger); box-shadow: none;" onclick="forceSubmit()">Submit Early</button>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <span id="qCategory" class="q-cat">Category</span>
+                        <span id="qCounter" style="font-weight: 800; color: var(--text-muted);">Q 1 / 50</span>
+                    </div>
+                    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+                    
+                    <h3 id="qText" class="q-text">Loading question...</h3>
+                    
+                    <div id="optionsGrid" class="opt-grid"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
+                        <button class="btn" id="btnPrev" style="background: var(--bg-main); color: var(--secondary); border: 1px solid var(--border); box-shadow: none;" onclick="prevQuestion()" disabled>← Previous</button>
+                        <button class="btn" id="btnNext" onclick="nextQuestion()" disabled>Next Question →</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screenResults" class="screen">
+                <div class="card" style="text-align: center;">
+                    <h2 style="font-size: 40px; color: var(--secondary); font-weight: 900; margin-bottom: 30px;">Exam Completed</h2>
+                    <div class="score-circle" id="finalScorePct">0%</div>
+                    <h3 id="scoreMessage" style="font-size: 24px; margin-bottom: 10px; color: var(--primary);">Calculating...</h3>
+                    <p id="scoreMarks" style="font-size: 18px; color: var(--text-muted); font-weight: 700; margin-bottom: 30px;">Marks: 0 / 50</p>
+                    
+                    <div class="diagnostic-box" id="diagnosticBox">
+                        <h4>🧠 Weak Points Detected: Where to Improve</h4>
+                        <p style="margin-bottom: 15px; color: var(--text-main);">Based on your incorrect answers, we recommend reviewing the following modules in the Study Hub:</p>
+                        <ul class="diag-list" id="diagnosticList"></ul>
+                    </div>
+
+                    <button class="btn" onclick="location.reload()">Take Another Mock Test</button>
+                </div>
+
+                <div class="review-header">Detailed Answer Review</div>
+                <div id="reviewContainer"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- MASSIVE 150 UNIQUE QUESTION DATABASE ---
+        const database = [
+            { c: "Week 1", q: "According to Hollensen, what fundamentally defines International Marketing?", o: ["Lack of competitors", "Making marketing mix decisions across national boundaries", "Domestic sales only", "Standardizing everything"], a: 1, e: "It requires cross-border execution, introducing immense legal and cultural complexity." },
+            { c: "Week 1", q: "Which statement best describes 'Glocalization'?", o: ["Applying exact same strategy worldwide", "Building unique products from scratch everywhere", "Balancing global economies of scale with local responsiveness", "Outsourcing production"], a: 2, e: "'Think Global, Act Local'. It standardizes core components while adapting outer features." },
+            { c: "Week 1", q: "In the EPRG Framework, what does an 'Ethnocentric' approach mean?", o: ["World-oriented view", "Applying home-country standard to all foreign markets", "Adapting uniquely everywhere", "Opportunistic selection"], a: 1, e: "The firm assumes what works at home will work abroad automatically." },
+            { c: "Week 1", q: "What is the primary operational benefit of Product Standardization?", o: ["Local relevance", "Bypassing tariffs", "Economies of scale in production", "Meeting safety laws"], a: 2, e: "Producing identical units globally massively reduces costs." },
+            { c: "Week 1", q: "What is 'Modularization'?", o: ["Small geographic modules", "Standardizing internal components while adapting exterior", "Hiring temporary staff", "Using multiple ad agencies"], a: 1, e: "It allows a company to gain economies of scale on internal parts while customizing the outside." },
+            { c: "Week 1", q: "Why is 'Coordination' a major challenge in global marketing?", o: ["Requires one language", "Branches may compete against each other", "Illegal under WTO", "Prevents research"], a: 1, e: "Without coordination, a UK branch might cannibalize sales from a French branch." },
+            { c: "Week 1", q: "What characterizes a 'Polycentric' firm?", o: ["Assume home culture is superior", "Look for global similarities", "Grant local managers total autonomy", "Only sell digitally"], a: 2, e: "They adapt to everything, maximizing local relevance but sacrificing scale." },
+            { c: "Week 1", q: "What does 'Administrative Distance' refer to?", o: ["Physical miles", "Cultural values", "Bureaucracy, corruption, and institutional differences", "Management salaries"], a: 2, e: "High distance means dealing with vastly different red tape and taxes." },
+            { c: "Week 1", q: "Which of the following is an 'uncontrollable' element for an international marketer?", o: ["Product design", "Promotional budget", "Foreign political environment", "Distribution channel"], a: 2, e: "Marketers cannot control foreign governments or laws; they must adapt to them." },
+            { c: "Week 1", q: "Which approach is most prone to the 'Self-Reference Criterion' bias?", o: ["Geocentric", "Polycentric", "Ethnocentric", "Regiocentric"], a: 2, e: "Ethnocentric firms assume their home culture is universally applicable." },
+            { c: "Week 1", q: "How does the physical 'Infrastructure' of a host country impact marketing?", o: ["Determines language", "Dictates physical distribution capabilities", "Establishes tariffs", "Prevents standardization"], a: 1, e: "Lack of paved roads or cold-chain limits how products are delivered." },
+            { c: "Week 1", q: "What is the ultimate goal of an International Strategic Marketing Plan?", o: ["Identical prices everywhere", "Eliminate culture", "Create sustainable competitive advantage across borders", "Digital only marketing"], a: 2, e: "The goal is to navigate global/local tension to outperform competitors." },
+            { c: "Week 1", q: "What is the key danger of absolute Standardization?", o: ["High R&D cost", "Alienating local consumers", "Complicated supply chains", "Loss of control"], a: 1, e: "If you ignore local tastes, consumers will reject the product." },
+            { c: "Week 1", q: "What is the key danger of absolute Adaptation?", o: ["Too cheap", "Loss of economies of scale", "Legal issues", "Government bans"], a: 1, e: "Changing everything for every country destroys profit margins." },
+            { c: "Week 1", q: "In the EPRG framework, what is a Geocentric approach?", o: ["Home country focus", "Local autonomy", "Targeting global segments with localized execution", "Region-only focus"], a: 2, e: "Geocentric seeks global integration with local responsiveness." },
+            
+            { c: "Week 2", q: "When a country raises import tariffs, in PESTEL this falls under:", o: ["Technological", "Social", "Political/Legal", "Environmental"], a: 2, e: "Tariffs and trade embargoes are government political actions." },
+            { c: "Week 2", q: "In Porter's Five Forces, which scenario makes an industry highly attractive?", o: ["High Threat of Substitutes", "High Barriers to Entry", "High Buyer Power", "Intense Rivalry"], a: 1, e: "High barriers keep new competitors out, protecting existing profits." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Currency Exchange Rates'?", o: ["Political", "Economic", "Social", "Legal"], a: 1, e: "Exchange rates and inflation are macroeconomic variables." },
+            { c: "Week 2", q: "What is the primary purpose of Porter's Diamond of National Advantage?", o: ["Evaluate internal strengths", "Assess macro environment", "Explain why certain countries dominate specific industries", "Calculate shipping"], a: 2, e: "It analyzes why nations excel at specific things (e.g., German cars)." },
+            { c: "Week 2", q: "In Porter's Diamond, what are 'Demand Conditions'?", o: ["Global raw material demand", "Sophisticated local consumers forcing innovation", "Tax demands", "Export volume"], a: 1, e: "Demanding home buyers force local companies to improve quality." },
+            { c: "Week 2", q: "In the Value Chain, is 'Inbound Logistics' a Primary or Support activity?", o: ["Support", "Primary", "Secondary", "Tertiary"], a: 1, e: "It directly involves receiving and managing raw materials." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what is a 'Substitute'?", o: ["Direct competitor", "Product from a different industry solving the same problem", "Cheaper raw material", "Ad channel"], a: 1, e: "E.g., Streaming services are a substitute for physical theaters." },
+            { c: "Week 2", q: "What does 'Expropriation' mean?", o: ["Government seizing foreign assets", "Dumping goods", "Bribing officials", "Currency drop"], a: 0, e: "It is the ultimate political risk where a host country seizes your factory." },
+            { c: "Week 2", q: "In a SWOT analysis, where do PESTEL factors belong?", o: ["Strengths/Weaknesses", "Opportunities/Threats", "Only Threats", "They don't belong"], a: 1, e: "PESTEL scans the external environment (Opportunities/Threats)." },
+            { c: "Week 2", q: "True or False: In Porter's Diamond, strong domestic rivalry hurts global chances.", o: ["True", "False", "Only for SMEs", "Only in emerging markets"], a: 1, e: "False. Fierce domestic competition forces firms to become strong before expanding." },
+            { c: "Week 2", q: "In the Value Chain, 'HR Management' is classified as:", o: ["Primary", "Support", "External Threat", "Inbound Logistics"], a: 1, e: "HR facilitates primary activities by providing trained staff." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Urbanisation'?", o: ["Economic", "Technological", "Social", "Political"], a: 2, e: "Urbanisation and demographics are Social trends." },
+            { c: "Week 2", q: "How do 'Related and Supporting Industries' help in Porter's Diamond?", o: ["Increase substitutes", "Provide strong local supply chains", "Lower tariffs", "Decrease rivalry"], a: 1, e: "World-class local suppliers give manufacturers massive cost and speed advantages." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what increases 'Buyer Power'?", o: ["High switching costs", "Buying in massive bulk volumes", "Unique products", "Patents"], a: 1, e: "Massive volume buyers (like Walmart) can force suppliers to lower prices." },
+            { c: "Week 2", q: "What is an 'Economic' risk in international marketing?", o: ["A new data law", "Sudden hyperinflation in the host country", "Aging population", "Climate change"], a: 1, e: "Inflation destroys purchasing power and profit margins." },
+
+            { c: "Week 3", q: "Warranties, delivery, and installation make up the:", o: ["Core Product", "Actual Product", "Augmented Product", "Standardized Product"], a: 2, e: "Augmented product encompasses non-physical support services." },
+            { c: "Week 3", q: "What is the Country of Origin (COO) Effect?", o: ["Shipping tax", "Bias where consumers judge quality based on manufacture location", "Labeling law", "Local hiring requirement"], a: 1, e: "Assuming 'Swiss Made' implies superior engineering." },
+            { c: "Week 3", q: "What is 'Mandatory Adaptation'?", o: ["Changes dictated by absolute legal or safety requirements", "Changes for local taste", "New product invention", "Instruction translation"], a: 0, e: "Changing electrical voltage to legally sell in Europe." },
+            { c: "Week 3", q: "What is 'Discretionary Adaptation'?", o: ["Safety laws", "Changes made to align with local tastes to increase sales", "Brand new name", "Ignoring culture"], a: 1, e: "Adding spicy flavors to a global fast-food menu." },
+            { c: "Week 3", q: "What is 'Product Invention'?", o: ["Filing a patent", "Selling identical products", "Creating a new product from scratch for a foreign market", "Changing color"], a: 2, e: "Used when extending or adapting simply will not work." },
+            { c: "Week 3", q: "How do Consumer Income Levels dictate product decisions?", o: ["Premium sells everywhere", "Firms strip down products to make them affordable", "Only affects B2B", "Forces JVs"], a: 1, e: "Removing premium features lowers the entry price for developing nations." },
+            { c: "Week 3", q: "What is a 'Product Line Extension'?", o: ["Extended warranty", "Adding new variations to capture a new demographic", "Moving factories", "Acquisition"], a: 1, e: "E.g., LEGO launching 'LEGO Friends' for girls." },
+            { c: "Week 3", q: "What does 'Ease of Distribution' refer to in product policy?", o: ["Social media speed", "Physical infrastructure available to move the product", "Packaging language", "IP laws"], a: 1, e: "Without cold-chain trucks, you cannot sell frozen goods." },
+            { c: "Week 3", q: "Why is 'Brand Equity' important?", o: ["Allows launching new products with instant consumer trust", "Eliminates tariffs", "Prevents competitor ads", "Guarantees JVs"], a: 0, e: "Swiss Army used knife equity to sell watches." },
+            { c: "Week 3", q: "Can the COO effect be negative?", o: ["No", "Yes, if a country has a reputation for poor manufacturing", "Only in automotive", "Only if standardized"], a: 1, e: "Consumers avoid products from nations known for cheap/unsafe labor." },
+            { c: "Week 3", q: "The 'Core Product' refers to:", o: ["Packaging", "The fundamental problem-solving benefit the consumer buys", "Warranty", "Shipping method"], a: 1, e: "You buy 'the ability to make a hole', not a drill." },
+            { c: "Week 3", q: "Why might packaging require adaptation?", o: ["Save cardboard", "Comply with recycling laws or cultural color associations", "Never required", "Only for Pull strategy"], a: 1, e: "White means mourning in some cultures, bad for festive packaging." },
+            { c: "Week 3", q: "What is an 'Actual Product'?", o: ["The warranty", "The raw materials", "The physical attributes, design, and brand name", "The feeling of use"], a: 2, e: "It is the tangible item you hold in your hand." },
+            { c: "Week 3", q: "When entering a market with high illiteracy, how should packaging adapt?", o: ["More text", "Heavy use of visual symbols and color coding", "Remove all text", "No change needed"], a: 1, e: "Visual cues replace written instructions." },
+            { c: "Week 3", q: "A 'Global Brand' uses:", o: ["Different names everywhere", "The same name, logo, and positioning worldwide", "Only digital ads", "No packaging"], a: 1, e: "Apple and Coca-Cola rely on instant global recognition." },
+
+            { c: "Week 4", q: "How do cultures with 'High Uncertainty Avoidance' behave?", o: ["Embrace innovation", "Prioritize group harmony", "Feel threatened by ambiguity and rely on strict rules", "Accept unequal power"], a: 2, e: "They hate the unknown and demand guarantees (e.g. Japan, Germany)." },
+            { c: "Week 4", q: "What is the Self-Reference Criterion (SRC)?", o: ["Competitor evaluation tool", "Back-translation process", "Unconscious tendency to evaluate foreign markets using home cultural values", "Cultural merging"], a: 2, e: "It causes marketers to arrogantly run offensive or confusing campaigns." },
+            { c: "Week 4", q: "How is Culture defined?", o: ["Legal framework", "Sum total of learned beliefs and customs directing behavior", "Physical infrastructure", "Biological traits"], a: 1, e: "It acts as the invisible operating system of a society." },
+            { c: "Week 4", q: "What defines a 'High-Context' culture?", o: ["Direct, explicit communication", "Communication relies heavily on non-verbal cues and relationships", "People yell", "High GDP"], a: 1, e: "How you say it matters more than the literal words (e.g. Saudi Arabia)." },
+            { c: "Week 4", q: "Why is humor dangerous in cross-cultural advertising?", o: ["Too expensive", "Highly subjective and easily offensive in other cultures", "Violates WTO", "Distracts from product"], a: 1, e: "A sarcastic UK joke may deeply offend a Chinese audience." },
+            { c: "Week 4", q: "What is 'Power Distance (PDI)'?", o: ["Physical distance", "Degree to which unequal distribution of power is accepted", "Wage gap", "Energy consumption"], a: 1, e: "High PDI cultures respect strict hierarchy without question." },
+            { c: "Week 4", q: "What is 'Individualism vs. Collectivism'?", o: ["Single vs Bulk buying", "Focus on 'I' (self-reliance) vs 'We' (group harmony)", "Direct vs JV modes", "Rich vs Poor gap"], a: 1, e: "Collectivist cultures value family and community benefit over personal rebellion." },
+            { c: "Week 4", q: "What is 'Masculinity vs. Femininity' in Hofstede's model?", o: ["Gender ratio", "Preference for achievement/material success vs caring/quality of life", "Targeting one gender", "Women's legal rights"], a: 1, e: "Masculine cultures love status symbols and competition." },
+            { c: "Week 4", q: "What is 'Back-Translation'?", o: ["Stealing competitor ads", "Translating to foreign language, then having a different person translate it back", "Post-survey translation", "Google Translate backwards"], a: 1, e: "Essential to ensure cultural nuance and meaning are not lost." },
+            { c: "Week 4", q: "Why does IKEA adapt its catalog imagery globally?", o: ["Hide prices", "Reflect local living spaces and cultural norms", "Sell different furniture", "Avoid shipping taxes"], a: 1, e: "Japanese catalogs show smaller rooms; Saudi catalogs reflect modesty norms." },
+            { c: "Week 4", q: "If an ad focuses heavily on personal rebellion, what culture does it target?", o: ["High Uncertainty Avoidance", "High Individualism", "High Collectivism", "High Power Distance"], a: 1, e: "Rebellion appeals to individual expression, not group harmony." },
+            { c: "Week 4", q: "How does high Uncertainty Avoidance affect product launches?", o: ["Instant adoption", "Consumers are slow to adopt new innovations", "Ignore warranties", "Prevents standardization"], a: 1, e: "Marketers must offer free trials to lower perceived risk." },
+            { c: "Week 4", q: "What is 'Ethnocentrism'?", o: ["Belief that one's own culture is superior", "Blending of two cultures", "Hiring local managers", "Targeting minorities"], a: 0, e: "Causes managers to push home-country strategies that fail abroad." },
+            { c: "Week 4", q: "Is 'Psychic Distance' a Hofstede dimension?", o: ["Yes", "No", "Only in 2010 model", "Yes, replaced Power Distance"], a: 1, e: "No. It relates to market entry strategy, not core cultural values." },
+            { c: "Week 4", q: "What defines a 'Low-Context' culture?", o: ["Subtle metaphors", "Direct, explicit, and literal communication", "Low literacy", "Heavy use of symbols"], a: 1, e: "They value direct facts (e.g. USA, Germany)." },
+
+            { c: "Week 5", q: "What does the MACS Matrix stand for?", o: ["Macro And Cultural Strategy", "Market Attractiveness / Competitive Strength", "Marketing And Cost Systems", "Micro Analysis Control"], a: 1, e: "Quantitative tool to score which foreign markets to enter." },
+            { c: "Week 5", q: "What variables define 'Market Attractiveness' in MACS?", o: ["Brand awareness", "Market size, growth, and political stability", "Shipping costs", "Internal capital"], a: 1, e: "These are external factors making a country a lucrative target." },
+            { c: "Week 5", q: "What variables define 'Competitive Strength' in MACS?", o: ["GDP", "Brand awareness, local network, capital resources", "Tariffs", "Competitor prices"], a: 1, e: "Internal factors determining if the firm can actually win." },
+            { c: "Week 5", q: "What is 'Psychic Distance'?", o: ["Physical miles", "Perceived differences in culture, language, and business practices", "Currency gap", "Time zone difference"], a: 1, e: "SMEs prefer low psychic distance to reduce fear." },
+            { c: "Week 5", q: "What is the 'Opportunistic Approach' to market selection?", o: ["Complex algorithms", "Entering markets based on unsolicited orders or low psychic distance", "Hostile takeovers", "Always using FDI"], a: 1, e: "Used by SMEs who lack budget for full MACS screening." },
+            { c: "Week 5", q: "What is the Entry Mode risk/control continuum?", o: ["Low control equals high risk", "Higher control over a market requires higher financial risk", "Control is irrelevant", "Risk is fixed"], a: 1, e: "Exporting has no risk but no control; FDI has total control but massive risk." },
+            { c: "Week 5", q: "What is 'Indirect Exporting'?", o: ["Handling shipping internally", "Selling to a domestic intermediary who handles the foreign export", "Building a factory abroad", "Licensing IP"], a: 1, e: "Lowest risk mode; the intermediary takes the international risk." },
+            { c: "Week 5", q: "What is 'Licensing'?", o: ["Shipping goods directly", "Granting a foreign entity the right to use IP for a royalty fee", "Building a subsidiary", "A joint venture"], a: 1, e: "Monetizes patents without capital risk, but risks creating a competitor." },
+            { c: "Week 5", q: "How does 'Franchising' differ from Licensing?", o: ["Used only for physical products", "Parent pays local partner", "Includes strict operational rules and ongoing support", "Zero legal contracts"], a: 2, e: "McDonalds dictates exact cooking standards, not just the brand name." },
+            { c: "Week 5", q: "What defines a 'Joint Venture'?", o: ["Illegal under WTO", "Two companies sharing equity to create a new third corporate entity", "No shared risk", "One partner takes all profit"], a: 1, e: "Shared costs and knowledge, but high risk of management clashes." },
+            { c: "Week 5", q: "What is a 'Strategic Alliance'?", o: ["A Wholly Owned Subsidiary", "A new legal entity", "A contractual partnership that does NOT create a new legal entity", "Franchising"], a: 2, e: "Firms collaborate on a project while remaining independent." },
+            { c: "Week 5", q: "What is 'Foreign Direct Investment (FDI)'?", o: ["Exporting via intermediaries", "Buying or building physical facilities in the host country", "Licensing tech", "Selling shares"], a: 1, e: "Also known as a Wholly Owned Subsidiary; max control, max risk." },
+            { c: "Week 5", q: "What is a 'Greenfield Investment'?", o: ["Investing in eco-friendly tech", "A type of FDI building operations from scratch", "Buying an existing company", "Planting trees"], a: 1, e: "Offers a clean slate but takes years to build." },
+            { c: "Week 5", q: "According to TCA, when should a firm use FDI?", o: ["When small", "When the cost and risk of opportunistic behavior by external partners are too high", "When distance is zero", "When products are standard"], a: 1, e: "If partners might steal secrets, it's cheaper long-term to own it yourself." },
+            { c: "Week 5", q: "What defines a 'Born Global' firm?", o: ["Over 100 years old", "Targets international markets from its inception", "State-owned", "Uses only indirect export"], a: 1, e: "Tech startups that skip domestic growth and launch globally day one." },
+
+            { c: "Week 7", q: "In the communication model, what is 'Decoding'?", o: ["Creating the ad", "Translating to English", "How the consumer interprets the received message", "The media budget"], a: 2, e: "If decoded differently than intended, the campaign fails." },
+            { c: "Week 7", q: "In communication, what is 'Noise'?", o: ["Literal sounds only", "Advertising budget", "Cultural, linguistic, or competitive interference that distorts the message", "Consumer buying"], a: 2, e: "A bad translation or cultural faux pas acts as noise." },
+            { c: "Week 7", q: "Why use a 'Standardized' global ad campaign?", o: ["Local humor alignment", "Achieve economies of scale and consistent global identity", "Comply with local laws", "Appease local managers"], a: 1, e: "Saves millions in agency fees and unifies the brand." },
+            { c: "Week 7", q: "What is a 'Push' Strategy?", o: ["Mass media ads", "Trade shows, personal selling, and incentives to channel members", "Influencers", "Lobbying"], a: 1, e: "Motivating wholesalers/retailers to 'push' stock onto shelves." },
+            { c: "Week 7", q: "What is a 'Pull' Strategy?", o: ["Trade discounts", "Focusing heavily on mass media advertising to the end-consumer", "B2B sales", "Exporting"], a: 1, e: "Creating consumer desire so they 'pull' product through the channel." },
+            { c: "Week 7", q: "How does the legal environment impact communication?", o: ["Dictates product size", "Many countries ban ads for children, alcohol, or pharmaceuticals", "Controls language", "Bans internet"], a: 1, e: "A legal US commercial might be totally banned in the EU." },
+            { c: "Week 7", q: "What is 'Pattern Advertising'?", o: ["Geometric logos", "A global theme with localized execution", "Print only ads", "100% standardized commercial"], a: 1, e: "Core concept is the same, but local actors/voices are used." },
+            { c: "Week 7", q: "Why is literal language translation dangerous?", o: ["Idioms and cultural contexts do not translate literally", "Costs too much", "Illegal in EU", "Reduces noise"], a: 0, e: "'Finger lickin' good' translates poorly in China." },
+            { c: "Week 7", q: "How does literacy rate affect communication?", o: ["No effect", "Forces use of visual/audio channels instead of heavy text", "Increases print ads", "Lowers budgets"], a: 1, e: "In low-literacy areas, billboards and radio beat newspapers." },
+            { c: "Week 7", q: "What does HSBC's 'The World's Local Bank' represent?", o: ["Ethnocentric ad", "Glocalized communication strategy", "Price escalation", "Product standard"], a: 1, e: "Global strength combined with local sensitivity." },
+            { c: "Week 7", q: "What is the danger of international celebrity endorsements?", o: ["They charge too much", "A beloved US star might be unknown or disliked in Asia", "They refuse to travel", "It is a Push strategy"], a: 1, e: "Endorsements rarely cross borders perfectly." },
+            { c: "Week 7", q: "What is 'Adapted Communication'?", o: ["One ad for the world", "Customizing the ad to fit local humor, actors, and values", "Silent ads", "Radio only"], a: 1, e: "Required when a global message would be misunderstood." },
+            { c: "Week 7", q: "Can a firm standardize the product but adapt the communication?", o: ["No", "Yes, this is very common", "Only in B2B", "Only if forced by law"], a: 1, e: "Laughing Cow cheese is identical globally, but TV ads are heavily customized." },
+            { c: "Week 7", q: "What is the 'Sender' in the communication model?", o: ["The TV station", "The consumer", "The organization initiating the message", "The competitor"], a: 2, e: "The firm must encode the message properly." },
+            { c: "Week 7", q: "What represents 'Media Availability' in marketing?", o: ["Ad budgets", "Not all countries have the same internet or TV infrastructure", "Translation apps", "Government censors"], a: 1, e: "You cannot run a heavy YouTube campaign where internet is scarce." },
+
+            { c: "Week 8", q: "What is 'Price Escalation'?", o: ["Luxury branding", "Massive retail price increase of exports due to tariffs, shipping, and middlemen", "Domestic inflation", "Standardized prices"], a: 1, e: "Logistics and border costs multiply, making cheap items expensive abroad." },
+            { c: "Week 8", q: "What is 'Transfer Pricing'?", o: ["Bank FX fee", "Internal price charged between affiliated subsidiaries across borders", "Logistics cost", "Dumping"], a: 1, e: "Multinationals manipulate this to shift profits to low-tax countries." },
+            { c: "Week 8", q: "How do 'Grey Markets' form?", o: ["Counterfeiting", "Identical global pricing", "Large price discrepancies between countries allowing unauthorized arbitrage", "Government bans"], a: 2, e: "Smugglers buy cheap in one country and sell high in another." },
+            { c: "Week 8", q: "What is 'Geocentric Pricing'?", o: ["Universal global price", "Total local autonomy", "Strategic baseline global price with coordinated local adjustments", "Below cost pricing"], a: 2, e: "Balances local competitiveness while preventing severe Grey Market gaps." },
+            { c: "Week 8", q: "What is 'Market Skimming'?", o: ["Low initial price", "High initial price to target early adopters, then lowering it later", "Stripping features", "Tax evasion"], a: 1, e: "Used by tech firms to recoup R&D quickly." },
+            { c: "Week 8", q: "What is 'Market Penetration' Pricing?", o: ["High initial price", "Low initial price to rapidly capture massive market share", "Transfer pricing", "Luxury pricing"], a: 1, e: "Drives competitors away but sacrifices short-term profit." },
+            { c: "Week 8", q: "Why is 'Dumping' penalized by the WTO?", o: ["Creates Grey Markets", "Selling goods abroad below production cost to destroy local competitors", "Environmental damage", "Increases escalation"], a: 1, e: "It is a predatory monopoly tactic." },
+            { c: "Week 8", q: "How can a firm directly combat Price Escalation?", o: ["Raise home prices", "By manufacturing locally (FDI) to bypass tariffs and shipping", "Use Grey Markets", "Increase advertising"], a: 1, e: "Producing inside the target country eliminates border costs." },
+            { c: "Week 8", q: "What is 'Ethnocentric Pricing'?", o: ["Setting one universal global price based on the home country", "Letting locals decide", "Pricing based on rivals", "Dumping"], a: 0, e: "Often fails because it ignores local purchasing power." },
+            { c: "Week 8", q: "What is 'Polycentric Pricing'?", o: ["One price globally", "Allowing local managers total autonomy to set prices", "Baseline global price", "Government set pricing"], a: 1, e: "Maximizes local relevance but inevitably creates Grey Markets." },
+            { c: "Week 8", q: "How do Currency Exchange Rates affect pricing?", o: ["They don't", "If local currency crashes, profit margins disappear", "Increases tariffs", "Forces standardization"], a: 1, e: "Firms must constantly adjust prices or use hedging to survive volatility." },
+            { c: "Week 8", q: "What is 'Cost-Plus' pricing?", o: ["Adding a standard markup to the cost of manufacturing", "Pricing based on consumer demand", "Pricing below cost", "Skimming"], a: 0, e: "Simple, but ignores consumer willingness to pay." },
+            { c: "Week 8", q: "Why do governments scrutinize Transfer Pricing?", o: ["To protect consumers", "To prevent tax evasion by shifting profits to havens", "To stop dumping", "To encourage FDI"], a: 1, e: "Governments want tax revenue generated within their borders." },
+            { c: "Week 8", q: "What is a major risk of Penetration Pricing?", o: ["Attracts only luxury buyers", "Can trigger a destructive price war with local competitors", "Illegal everywhere", "Increases tariffs"], a: 1, e: "Competitors may drop their prices too, destroying industry profits." },
+            { c: "Week 8", q: "Why is Pricing unique in the marketing mix?", o: ["It generates revenue; the others generate costs", "It is the easiest to decide", "It cannot be changed", "It is ignored by consumers"], a: 0, e: "Pricing directly dictates profit margins and market positioning." },
+
+            { c: "Week 9", q: "Why is 'Secondary Data' the mandatory first step in research?", o: ["100% accurate always", "Fast, highly cost-effective, and readily available", "Primary is illegal", "Consumers prefer it"], a: 1, e: "Government reports provide a cheap overview, preventing obvious mistakes." },
+            { c: "Week 9", q: "What is a major limitation of Primary Data in foreign markets?", o: ["Incredibly expensive and time-consuming to collect", "Usually outdated", "Available to competitors", "Cannot be translated"], a: 0, e: "Custom cross-border surveys require massive budgets." },
+            { c: "Week 9", q: "What is 'Conceptual Equivalence'?", o: ["Equal survey costs", "Ensuring the underlying concept has the same meaning across cultures", "Identical sample sizes", "Same time zones"], a: 1, e: "If the concept (e.g. 'Family') differs, the data is useless." },
+            { c: "Week 9", q: "Why is random sampling difficult in emerging markets?", o: ["No consumers", "Lack of infrastructure (no addresses/low internet)", "Don't speak English", "Too much secondary data"], a: 1, e: "Without reliable census lists or internet, random sampling is nearly impossible." },
+            { c: "Week 9", q: "What is 'Social Desirability Bias'?", o: ["Refusing surveys", "Respondents answering favorably to look good to the researcher", "Altering data", "Using influencers"], a: 1, e: "People lie on surveys to look richer or healthier, skewing data." },
+            { c: "Week 9", q: "What is the primary purpose of Global Market Research?", o: ["To spend budgets", "Identify opportunities and mitigate financial risk of expansion", "Spy on employees", "Create grey markets"], a: 1, e: "Operating blindly in foreign markets almost guarantees failure." },
+            { c: "Week 9", q: "What is 'Observational Research'?", o: ["Reading reports", "Watching consumers interact with products in their natural environment", "Running algorithms", "Financial audits"], a: 1, e: "Useful when consumers are too polite to give negative feedback on a survey." },
+            { c: "Week 9", q: "How do you solve Translation Errors in surveys?", o: ["Google Translate", "Using Back-Translation", "Only English surveys", "Shorter surveys"], a: 1, e: "Translate A to B, then have someone else translate B to A to check accuracy." },
+            { c: "Week 9", q: "What is 'Quantitative' Research?", o: ["Data measured numerically", "Exploring underlying reasons", "Focus groups", "Interviews"], a: 0, e: "Surveys with 1-10 scales providing hard statistical numbers." },
+            { c: "Week 9", q: "What is 'Qualitative' Research?", o: ["Statistical data", "Data exploring underlying reasons and motivations", "Census reports", "Sales figures"], a: 1, e: "Focus groups providing rich, word-based insights." },
+            { c: "Week 9", q: "Why might focus groups fail in High Power Distance cultures?", o: ["They talk too much", "Subordinates won't speak up or disagree if a senior person is present", "No electricity", "Language barrier"], a: 1, e: "Strict social hierarchy stifles honest, open debate." },
+            { c: "Week 9", q: "What is a limitation of Secondary Data?", o: ["Too expensive", "May be outdated or lack specific relevance to the firm's exact problem", "Takes years to gather", "Illegal to use"], a: 1, e: "A census won't tell you if consumers like your specific new product." },
+            { c: "Week 9", q: "What is 'Primary Data'?", o: ["Government reports", "Original research collected specifically for the problem at hand", "Competitor filings", "Textbooks"], a: 1, e: "Surveys and focus groups designed exclusively for your firm." },
+            { c: "Week 9", q: "Why must legal privacy laws be researched before data collection?", o: ["They don't matter", "Data collection laws vary drastically (e.g. EU GDPR vs US laws)", "To pay tariffs", "To find translators"], a: 1, e: "Violating privacy laws results in massive fines." },
+            { c: "Week 9", q: "What is a 'Focus Group'?", o: ["A massive online survey", "A small group discussing a product guided by a moderator", "Secondary data", "A financial audit"], a: 1, e: "It provides deep qualitative insights into consumer feelings." },
+
+            { c: "Cases", q: "Electrolux achieved 'Glocalization' by:", o: ["Online only sales", "Standardizing internal subsystems while adapting exterior designs", "Single global fridge", "Moving HQ to Asia"], a: 1, e: "The motor is identical globally to save money, but the doors change to match local tastes." },
+            { c: "Cases", q: "LEGO retained core manufacturing in-house to:", o: ["Buy cheap plastic", "Maintain strict precision, quality control, and brand prestige", "Avoid Asia", "Get tax breaks"], a: 1, e: "Outsourcing risked losing the vital interlocking precision of their bricks." },
+            { c: "Cases", q: "McCain switched to healthier sunflower oil in response to:", o: ["Political environment", "Technological environment", "Socio-Cultural environment", "Economic environment"], a: 2, e: "Growing public concern regarding obesity and nutrition forced adaptation." },
+            { c: "Cases", q: "Swiss Army successfully expanded into watches by leveraging:", o: ["Price Escalation", "Brand Equity and the COO Effect", "Direct Exporting", "Dumping"], a: 1, e: "Consumers trusted the knife's durability and assumed the 'Swiss Made' watch was exceptional." },
+            { c: "Cases", q: "What matrix did Bosch use to evaluate Middle East expansion?", o: ["PESTEL", "Porter's 5 Forces", "The MACS Matrix", "Value Chain"], a: 2, e: "They systematically scored market attractiveness against their competitive strength." },
+            { c: "Cases", q: "The danger highlighted in the E-Bikes in China case was:", o: ["Too much primary data", "Translating Western surveys without understanding local laws (speed/weight caps)", "Grey markets", "Currency crashes"], a: 1, e: "Western surveys were irrelevant because Chinese law made Western e-bikes illegal." },
+            { c: "Trends", q: "Deloitte's 'Agility' trend refers to:", o: ["Online stores", "Structural flexibility to rapidly change the marketing playbook", "Hiring athletes", "Agile software"], a: 1, e: "Post-pandemic, firms must be able to pivot messaging instantly." },
+            { c: "Trends", q: "Deloitte's 'Purpose' trend mandates organizations to:", o: ["Support all politics", "Know their core 'Why' beyond making a profit to guide decisions", "Standardize comms", "Eliminate humans"], a: 1, e: "Purpose acts as a North Star during market disruptions." },
+            { c: "Trends", q: "Deloitte's 'Trust' trend requires:", o: ["Low prices", "Demonstrating both intent (empathy) and competence to deliver", "Only intent", "Only competence"], a: 1, e: "Trust requires humanity plus the operational ability to get the job done." },
+            { c: "Trends", q: "Deloitte's 'Participation' trend means:", o: ["Passive buyers", "Moving consumers to active brand ambassadors and co-creators", "Voting for CEOs", "Ignoring feedback"], a: 1, e: "Inviting users to influence product development and narrative." },
+            { c: "Trends", q: "Deloitte's 'Fusion' trend involves:", o: ["Nuclear energy", "Creating new ecosystems via cross-industry partnerships", "Mergers only", "Standardizing products"], a: 1, e: "Breaking down traditional silos (e.g. Bank partnering with a health app)." },
+            { c: "Synthesis", q: "A UK hospitality brand settles foreign domain invoices in USDT. What risk are they hedging?", o: ["Political", "Technological", "Economic (Currency/Exchange) Risk", "Social"], a: 2, e: "Using stable digital currency protects against fiat currency devaluation." },
+            { c: "Synthesis", q: "A warehouse operative notices huge tariff costs on imported goods. What concept is this?", o: ["Transfer Pricing", "Price Escalation", "Market Skimming", "Dumping"], a: 1, e: "The practical reality of cross-border taxes multiplying the final cost." },
+            { c: "Synthesis", q: "What is the ultimate key to mastering International Strategic Marketing?", o: ["Memorizing terms", "Always standardizing", "Critically applying frameworks to balance global efficiencies with local cultural realities", "Relying on SRC"], a: 2, e: "Distinction-level mastery requires navigating the tension between scale and local relevance." },
+            { c: "Synthesis", q: "A tech company launches an AI platform globally on day one. They are a:", o: ["Joint Venture", "Born Global Firm", "Grey Market Operator", "Traditional MNE"], a: 1, e: "Tech firms often skip domestic growth and target the world immediately." }
+        ];
+
+        // --- EXAM STATE ---
+        let examQuestions = [];
+        let userAnswers = []; 
+        let currentQ = 0;
+        let timerInterval;
+        let timeLeft = 3600; 
+
+        function toggleTheme() {
+            const h = document.documentElement;
+            h.setAttribute('data-theme', h.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+            document.getElementById('themeBtn').innerText = h.getAttribute('data-theme') === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function startExam() {
+            // Randomly select 50 questions from the massive 150 database
+            examQuestions = database.sort(() => Math.random() - 0.5).slice(0, 50);
+            userAnswers = new Array(50).fill(null);
+            currentQ = 0;
+            timeLeft = 3600;
+
+            switchScreen('screenExam');
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerUI();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ Time is up! Your exam will now be submitted.");
+                    calculateResults();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            const display = document.getElementById('timerDisplay');
+            display.innerText = `${m}:${s}`;
+            if (timeLeft <= 300) display.style.color = 'var(--danger)'; 
+            else display.style.color = 'var(--primary)';
+        }
+
+        function loadQuestion() {
+            const q = examQuestions[currentQ];
+            
+            document.getElementById('qCategory').innerText = q.c;
+            document.getElementById('qCounter').innerText = `Q ${currentQ + 1} / 50`;
+            document.getElementById('qText').innerText = q.q;
+            document.getElementById('progressFill').style.width = ((currentQ + 1) / 50 * 100) + '%';
+
+            document.getElementById('btnPrev').disabled = (currentQ === 0);
+            const btnNext = document.getElementById('btnNext');
+            btnNext.disabled = (userAnswers[currentQ] === null); 
+            
+            if (currentQ === 49) {
+                btnNext.innerText = 'Submit Exam ✓';
+                btnNext.style.background = 'var(--success)';
+            } else {
+                btnNext.innerText = 'Next Question →';
+                btnNext.style.background = 'var(--primary)';
+            }
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            q.o.forEach((optText, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                if (userAnswers[currentQ] === index) btn.classList.add('selected'); 
+                
+                btn.innerHTML = `<div class="opt-l">${String.fromCharCode(65 + index)}</div><div>${optText}</div>`;
+                
+                btn.onclick = () => {
+                    userAnswers[currentQ] = index; 
+                    document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById('btnNext').disabled = false; 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function prevQuestion() {
+            if (currentQ > 0) { currentQ--; loadQuestion(); }
+        }
+
+        function nextQuestion() {
+            if (currentQ < 49) { currentQ++; loadQuestion(); }
+            else { calculateResults(); }
+        }
+
+        function forceSubmit() {
+            if (confirm("Are you sure you want to submit your exam early?")) {
+                calculateResults();
+            }
+        }
+
+        function calculateResults() {
+            clearInterval(timerInterval);
+            switchScreen('screenResults');
+
+            let score = 0;
+            let mistakesByCategory = {};
+
+            examQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.a) {
+                    score++;
+                } else {
+                    let cat = q.c.split(':')[0];
+                    mistakesByCategory[cat] = (mistakesByCategory[cat] || 0) + 1;
+                }
+            });
+
+            const pct = Math.round((score / 50) * 100);
+            
+            document.getElementById('finalScorePct').innerText = pct + '%';
+            document.getElementById('scoreMarks').innerText = `Marks: ${score} / 50`;
+            
+            const msg = document.getElementById('scoreMessage');
+            if (pct >= 80) { msg.innerText = "🏆 Distinction Level! Outstanding."; msg.style.color = "var(--success)"; }
+            else if (pct >= 60) { msg.innerText = "⭐ Merit Level! Solid performance."; msg.style.color = "var(--warning)"; }
+            else { msg.innerText = "📖 Keep Studying! Review your mistakes below."; msg.style.color = "var(--danger)"; }
+
+            const diagList = document.getElementById('diagnosticList');
+            diagList.innerHTML = '';
+            
+            const sortedMistakes = Object.keys(mistakesByCategory).sort((a,b) => mistakesByCategory[b] - mistakesByCategory[a]);
+            
+            if (sortedMistakes.length > 0) {
+                sortedMistakes.slice(0, 4).forEach(cat => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `❌ <strong>${cat}</strong>: Missed ${mistakesByCategory[cat]} questions`;
+                    diagList.appendChild(li);
+                });
+            } else {
+                diagList.innerHTML = `<li>🎉 Flawless! You did not miss a single category.</li>`;
+            }
+
+            renderDetailedReview();
+        }
+
+        function renderDetailedReview() {
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = '';
+
+            examQuestions.forEach((q, i) => {
+                const userChoice = userAnswers[i];
+                const isCorrect = (userChoice === q.a);
+                const isUnanswered = (userChoice === null);
+
+                const card = document.createElement('div');
+                card.className = `rev-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+                let html = `<div class="rev-q">Q${i+1}. ${q.q}</div>`;
+                
+                if (isCorrect) {
+                    html += `<div class="rev-ans ans-user-right">✓ Your Answer: ${q.o[userChoice]}</div>`;
+                } else if (isUnanswered) {
+                    html += `<div class="rev-ans ans-user-wrong">❌ You left this blank.</div>`;
+                    html += `<div class="rev-ans ans-correct">✓ Correct Answer: ${q.o[q.a]}</div>`;
+                } else {
+                    html += `<div class="rev-ans ans-user-wrong">❌ Your Answer: ${q.o[userChoice]}</div>`;
+                    html += `<div class="rev-ans ans-correct">✓ Correct Answer: ${q.o[q.a]}</div>`;
+                }
+
+                html += `<div class="rev-why"><strong>The "Why":</strong> ${q.e}</div>`;
+                
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

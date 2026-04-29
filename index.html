@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Binaya Gurung</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- THEMES & VARIABLES --- */
+        :root[data-theme="light"] {
+            --bg-main: #f0f4f8; --bg-glass: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
+            --primary: #4f46e5; --secondary: #0f172a; --text-main: #1e293b; --text-muted: #64748b; 
+            --border: rgba(0, 0, 0, 0.1); --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+        }
+        :root[data-theme="dark"] {
+            --bg-main: #0b0f19; --bg-glass: rgba(15, 23, 42, 0.85); --bg-card: #1e293b;
+            --primary: #6366f1; --secondary: #f8fafc; --text-main: #f1f5f9; --text-muted: #94a3b8; 
+            --border: rgba(255, 255, 255, 0.1); --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
+            --success: #34d399; --warning: #fbbf24; --danger: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+
+        body { 
+            display: flex; flex-direction: column; min-height: 100vh; color: var(--text-main); background: var(--bg-main);
+            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 50%);
+            overflow-x: hidden;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar { 
+            background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); padding: 20px 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); 
+        }
+        .brand { display: flex; flex-direction: column; }
+        .brand h1 { font-size: 28px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;}
+        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        
+        .btn-theme { 
+            background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); 
+            padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; 
+            box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px;
+        }
+        .btn-theme:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+
+        /* --- HERO SECTION --- */
+        .hero { padding: 60px 20px 40px; text-align: center; max-width: 900px; margin: 0 auto; width: 100%; }
+        .hero h2 { font-size: 48px; font-weight: 900; color: var(--secondary); margin-bottom: 20px; line-height: 1.2; }
+        .hero p { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; padding: 0 10px; }
+
+        /* --- GRID LAYOUT --- */
+        /* minmax(280px) ensures cards shrink to fit mobile screens perfectly without overflowing */
+        .module-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; padding: 0 30px 80px 30px; max-width: 1200px; margin: 0 auto; width: 100%;
+        }
+        
+        /* --- LAUNCH CARDS --- */
+        .launch-card { 
+            background: var(--bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border); border-radius: 24px; padding: 35px 25px; 
+            box-shadow: var(--shadow); text-align: center; text-decoration: none; color: inherit; 
+            position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; 
+        }
+        .launch-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.3); }
+        
+        .launch-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, var(--primary), var(--success)); opacity: 0; transition: 0.3s; }
+        .launch-card:hover::before { opacity: 1; }
+
+        .card-icon { font-size: 55px; margin-bottom: 15px; }
+        .card-title { font-size: 24px; font-weight: 800; color: var(--secondary); margin-bottom: 15px; }
+        .card-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; flex-grow: 1; }
+        
+        .btn-launch { 
+            background: var(--primary); color: white; border: none; padding: 14px 20px; 
+            border-radius: 12px; font-weight: 800; font-size: 15px; display: inline-block; 
+            width: 100%; transition: 0.3s; 
+        }
+        .launch-card:hover .btn-launch { background: var(--primary-hover); transform: scale(1.03); }
+
+        /* Unique Mock Exam Styling */
+        .card-exam { border-color: rgba(239, 68, 68, 0.3); }
+        .card-exam:hover { border-color: var(--danger); box-shadow: 0 20px 40px -10px rgba(239, 68, 68, 0.2); }
+        .card-exam .btn-launch { background: var(--danger); }
+        .card-exam:hover .btn-launch { background: #dc2626; }
+        .card-exam::before { background: linear-gradient(90deg, var(--danger), var(--warning)); }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .brand h1 { font-size: 24px; }
+            
+            .hero { padding: 40px 15px 30px; }
+            .hero h2 { font-size: 34px; }
+            .hero p { font-size: 16px; }
+            
+            .module-grid { padding: 0 15px 50px 15px; gap: 20px; grid-template-columns: 1fr; }
+            .launch-card { padding: 25px 20px; }
+            .card-icon { font-size: 45px; }
+            .card-title { font-size: 22px; }
+        }
+        
+        @media (max-width: 380px) {
+            .btn-theme span { display: none; } /* Hide text, keep emoji on tiny screens */
+            .btn-theme { padding: 10px; border-radius: 50%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="brand">
+            <h1>ZENITH</h1>
+            <span>Master Dashboard</span>
+        </div>
+        <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><span>☀️ Light Mode</span></button>
+    </div>
+
+    <div class="hero">
+        <h2>Welcome BINAYA</h2>
+        <p>Your entire International Strategic Marketing module is organized here. Select an app below to launch your study session.</p>
+    </div>
+
+    <div class="module-grid">
+        
+        <a href="course.html" class="launch-card">
+            <div class="card-icon">📚</div>
+            <div class="card-title">Deep Study Hub</div>
+            <div class="card-desc">The complete syllabus (Weeks 1-9). Master the academic theory, layman's translations, and real-life business scenarios.</div>
+            <div class="btn-launch">Open Study Hub →</div>
+        </a>
+
+        <a href="vault.html" class="launch-card">
+            <div class="card-icon">📖</div>
+            <div class="card-title">150+ Q&A Vault</div>
+            <div class="card-desc">Rapid review of over 150 questions. Includes "Study Mode" to hide answers and test your active recall instantly.</div>
+            <div class="btn-launch">Open Q&A Vault →</div>
+        </a>
+
+        <a href="mock3.html" class="launch-card">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">Deep Analysis Vault</div>
+            <div class="card-desc">The ultimate deep-dive. 150 unique questions where EVERY single option (A, B, C, D) is analyzed and explained.</div>
+            <div class="btn-launch">Open Deep Analysis →</div>
+        </a>
+
+        <a href="mock4.html" class="launch-card card-exam">
+            <div class="card-icon">⏱️</div>
+            <div class="card-title">1-Hour Mock Exam</div>
+            <div class="card-desc">The ultimate test. 50 random questions, a strict 60-minute countdown, and an AI diagnostic report pinpointing weak spots.</div>
+            <div class="btn-launch">Launch Live Exam →</div>
+        </a>
+
+    </div>
+
+    <script>
+        // Simple Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            const span = btn.querySelector('span') || btn;
+            
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+                span.innerHTML = '☀️ Light Mode';
+                if(!btn.querySelector('span')) btn.innerHTML = '☀️';
+            } else {
+                html.setAttribute('data-theme', 'light');
+                span.innerHTML = '🌙 Dark Mode';
+                if(!btn.querySelector('span')) btn.innerHTML = '🌙';
+            }
+        }
+        
+        // Auto-adjust button text on tiny screens on load
+        window.addEventListener('resize', adjustThemeBtn);
+        window.addEventListener('load', adjustThemeBtn);
+        
+        function adjustThemeBtn() {
+            const btn = document.getElementById('themeBtn');
+            if(window.innerWidth <= 380) {
+                if(btn.innerHTML.includes('Light')) btn.innerHTML = '☀️';
+                if(btn.innerHTML.includes('Dark')) btn.innerHTML = '🌙';
+            } else {
+                const html = document.documentElement;
+                if (html.getAttribute('data-theme') === 'dark') {
+                    btn.innerHTML = '<span>☀️ Light Mode</span>';
+                } else {
+                    btn.innerHTML = '<span>🌙 Dark Mode</span>';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

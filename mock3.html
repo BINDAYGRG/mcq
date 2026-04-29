@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM7403 | 150 Unique Deep Q&A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- THEMES & VARIABLES --- */
+        :root[data-theme="light"] {
+            --bg-main: #f0f4f8; --bg-glass: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
+            --primary: #4f46e5; --secondary: #0f172a;
+            --text-main: #1e293b; --text-muted: #64748b; --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
+            --correct-bg: rgba(16, 185, 129, 0.1); --correct-border: #10b981; --correct-text: #059669;
+            --wrong-bg: rgba(239, 68, 68, 0.05); --wrong-border: rgba(239, 68, 68, 0.3); --wrong-text: #dc2626;
+        }
+        :root[data-theme="dark"] {
+            --bg-main: #0b0f19; --bg-glass: rgba(15, 23, 42, 0.85); --bg-card: #1e293b;
+            --primary: #6366f1; --secondary: #f8fafc;
+            --text-main: #f1f5f9; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
+            --correct-bg: rgba(52, 211, 153, 0.1); --correct-border: #34d399; --correct-text: #10b981;
+            --wrong-bg: rgba(248, 113, 113, 0.05); --wrong-border: rgba(248, 113, 113, 0.3); --wrong-text: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
+
+        body { display: flex; height: 100vh; color: var(--text-main); overflow: hidden; background: var(--bg-main); background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 50%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent 50%); }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 320px; background: var(--bg-glass); backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 20px; z-index: 100; }
+        .brand { text-align: center; margin-bottom: 30px; }
+        .brand h1 { font-size: 28px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--correct-border)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;}
+        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+
+        .nav-menu { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .nav-menu::-webkit-scrollbar { width: 4px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .nav-item { padding: 14px 20px; border-radius: 12px; color: var(--text-muted); font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); transform: translateX(5px); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 20px -10px var(--primary); font-weight: 700; }
+        
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .header-bar h2 { font-size: 32px; font-weight: 800; color: var(--secondary); }
+        
+        .controls { display: flex; gap: 15px; align-items: center; width: 100%; max-width: 600px;}
+        .search-bar { flex: 1; padding: 14px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-size: 16px; box-shadow: var(--shadow); outline: none; }
+        .search-bar:focus { border-color: var(--primary); }
+        .btn { background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); padding: 14px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+        .btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        .btn-active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- DEEP QA CARDS --- */
+        .qa-list { display: flex; flex-direction: column; gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .qa-card { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 35px; box-shadow: var(--shadow); position: relative; }
+        .qa-card:hover { border-color: var(--primary); }
+        
+        .qa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .qa-cat { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .qa-num { color: var(--text-muted); font-weight: 800; font-size: 18px; }
+        
+        .qa-q { font-size: 24px; font-weight: 800; color: var(--secondary); margin-bottom: 25px; line-height: 1.5; }
+        
+        .btn-reveal { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.3s; }
+        .btn-reveal:hover { filter: brightness(1.1); }
+        .qa-card.revealed .btn-reveal { display: none; }
+
+        .qa-options-container { display: none; flex-direction: column; gap: 15px; animation: slideDown 0.4s ease; }
+        .qa-card.revealed .qa-options-container { display: flex; }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Option Styling */
+        .opt-box { border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-card); }
+        .opt-box.is-correct { border-color: var(--correct-border); background: var(--correct-bg); }
+        .opt-box.is-wrong { border-color: var(--wrong-border); background: var(--wrong-bg); }
+
+        .opt-header { display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: 700; color: var(--secondary); }
+        .opt-letter { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; flex-shrink: 0; }
+        
+        .is-correct .opt-letter { background: var(--correct-border); color: white; }
+        .is-wrong .opt-letter { background: var(--border); color: var(--text-muted); }
+        .is-correct .opt-text { color: var(--correct-text); }
+        .is-wrong .opt-text { color: var(--text-muted); text-decoration: line-through; opacity: 0.8;}
+
+        .opt-explanation { font-size: 15px; line-height: 1.6; color: var(--text-main); padding-top: 10px; border-top: 1px dashed var(--border); margin-top: 5px; }
+        .is-correct .opt-explanation { color: var(--correct-text); }
+        .is-wrong .opt-explanation { color: var(--wrong-text); }
+
+        .reveal-hint { display: none; color: var(--primary); font-weight: 700; font-size: 14px; margin-top: 10px; cursor: pointer; text-align: center; }
+        .study-mode .reveal-hint { display: block; }
+        .study-mode .qa-card { cursor: pointer; }
+        .study-mode .qa-card.revealed .reveal-hint { display: none; }
+
+        /* Mobile */
+        .mobile-toggle { display: none; background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; }
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; transition: 0.4s; z-index: 200; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .main-wrapper { padding: 20px; }
+            .controls { flex-direction: column; width: 100%; align-items: stretch; }
+            .header-bar { align-items: flex-start; }
+            .qa-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <h1>150 UNIQUE Q&A</h1>
+            <span>BM7403 • Deep Vault</span>
+        </div>
+        
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-item active" onclick="filterCat('All', this)">All Topics</div>
+            <div class="nav-item" onclick="filterCat('Week 1', this)">Week 1: Fundamentals</div>
+            <div class="nav-item" onclick="filterCat('Week 2', this)">Week 2: Environment</div>
+            <div class="nav-item" onclick="filterCat('Week 3', this)">Week 3: Product</div>
+            <div class="nav-item" onclick="filterCat('Week 4', this)">Week 4: Culture</div>
+            <div class="nav-item" onclick="filterCat('Week 5', this)">Week 5/6: Entry Modes</div>
+            <div class="nav-item" onclick="filterCat('Week 7', this)">Week 7: Comms</div>
+            <div class="nav-item" onclick="filterCat('Week 8', this)">Week 8: Pricing</div>
+            <div class="nav-item" onclick="filterCat('Week 9', this)">Week 9: Research</div>
+            <div class="nav-item" onclick="filterCat('Case', this)">Case Studies</div>
+        </div>
+    </div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="header-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menu</button>
+                <h2 id="pageTitle">All Topics</h2>
+            </div>
+            <div class="controls">
+                <input type="text" class="search-bar" id="searchInput" placeholder="Search questions..." onkeyup="searchQs()">
+                            <button class="btn-theme" onclick="window.location.href='index.html'" style="margin-right: 10px;">🏠 Dashboard</button>
+
+                <button class="btn" id="studyBtn" onclick="toggleStudyMode()">🧠 Study Mode: OFF</button>
+                <button class="btn" onclick="revealAll()">👁️ Reveal All</button>
+                <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+            </div>
+        </div>
+
+        <div class="qa-list" id="qaList">
+            </div>
+    </div>
+
+    <script>
+        // =================================================================================
+        // THE 150 UNIQUE QUESTION DATABASE (PART 1: Q1 to Q50)
+        // Every single option is explained. No duplicates.
+        // =================================================================================
+        const detailedDB = [
+            // --- WEEK 1: FUNDAMENTALS (Q1 - Q12) ---
+            {
+                c: "Week 1",
+                q: "According to Hollensen, what fundamentally defines International Marketing?",
+                opts: [
+                    { t: "The complete lack of competitors in foreign markets.", isCorrect: false, e: "❌ Incorrect. Foreign markets actually expose firms to more competition from entrenched local incumbents." },
+                    { t: "A fundamental difference in the basic laws of economics.", isCorrect: false, e: "❌ Incorrect. The basic economic principles of supply and demand remain the same regardless of borders." },
+                    { t: "Execution of one or more marketing mix decisions across national boundaries.", isCorrect: true, e: "✅ Correct. This cross-border execution introduces immense complexity regarding currencies, laws, and cultures." },
+                    { t: "The requirement to always standardize the marketing mix.", isCorrect: false, e: "❌ Incorrect. International marketing often demands adaptation to survive local differences." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "Which statement best describes the strategic concept of 'Glocalization'?",
+                opts: [
+                    { t: "Applying the exact same marketing strategy worldwide to save money.", isCorrect: false, e: "❌ Incorrect. This defines pure 'Standardization' or an Ethnocentric approach." },
+                    { t: "Building a brand new, unique product from scratch for every single country.", isCorrect: false, e: "❌ Incorrect. This defines extreme 'Adaptation', which destroys economies of scale." },
+                    { t: "Balancing global economies of scale with local market responsiveness.", isCorrect: true, e: "✅ Correct. 'Think Global, Act Local'. It involves standardizing core components while adapting outer features to satisfy local tastes." },
+                    { t: "Outsourcing all production to a single foreign country.", isCorrect: false, e: "❌ Incorrect. Outsourcing is a supply chain tactic, not a marketing strategy." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "In the EPRG Framework, what does an 'Ethnocentric' approach mean?",
+                opts: [
+                    { t: "Giving each host country a highly adapted, unique strategy.", isCorrect: false, e: "❌ Incorrect. That is the definition of a Polycentric approach." },
+                    { t: "Applying the home-country standard to all foreign markets.", isCorrect: true, e: "✅ Correct. The firm assumes what works at home will automatically work abroad, often leading to failure." },
+                    { t: "A world-oriented view targeting global segments.", isCorrect: false, e: "❌ Incorrect. That is the definition of a Geocentric approach." },
+                    { t: "Entering markets solely based on low psychic distance.", isCorrect: false, e: "❌ Incorrect. That refers to the opportunistic market selection approach." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "What is the primary operational benefit of Product Standardization?",
+                opts: [
+                    { t: "Higher local market relevance.", isCorrect: false, e: "❌ Incorrect. Standardized products often lack relevance to specific local niches." },
+                    { t: "Bypassing local import tariffs.", isCorrect: false, e: "❌ Incorrect. Tariffs are based on trade laws, not whether the product is standardized." },
+                    { t: "Economies of scale in production and R&D.", isCorrect: true, e: "✅ Correct. Producing millions of identical units massively reduces the cost per unit." },
+                    { t: "Ensuring compliance with all foreign electrical laws.", isCorrect: false, e: "❌ Incorrect. Standardized products usually fail foreign safety and electrical regulations." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "What is 'Modularization' in an international manufacturing context?",
+                opts: [
+                    { t: "Selling products in distinct, small geographic modules.", isCorrect: false, e: "❌ Incorrect. Modularization relates to product design, not geographic territories." },
+                    { t: "Hiring temporary, modular staff for global expansions.", isCorrect: false, e: "❌ Incorrect. This relates to HR, not product strategy." },
+                    { t: "Standardizing internal components while adapting external designs.", isCorrect: true, e: "✅ Correct. It allows a company (like Electrolux) to gain economies of scale on the 'guts' of a machine while customizing the outside." },
+                    { t: "Using multiple advertising agencies for one campaign.", isCorrect: false, e: "❌ Incorrect. This relates to communication, not manufacturing." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "Why is 'Coordination' considered a major challenge in global marketing?",
+                opts: [
+                    { t: "It requires all employees to speak the same language.", isCorrect: false, e: "❌ Incorrect. Multinationals operate in multiple languages daily." },
+                    { t: "Without it, multinational branches may end up competing against each other.", isCorrect: true, e: "✅ Correct. Without centralized coordination, a company's UK branch might cannibalize sales or contradict the marketing of its French branch." },
+                    { t: "It is illegal under World Trade Organization rules.", isCorrect: false, e: "❌ Incorrect. The WTO does not regulate internal corporate coordination." },
+                    { t: "It prevents the use of secondary market research.", isCorrect: false, e: "❌ Incorrect. Coordination has no bearing on gathering secondary data." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "In the EPRG Framework, what characterizes a 'Polycentric' firm?",
+                opts: [
+                    { t: "They assume their home culture is superior.", isCorrect: false, e: "❌ Incorrect. This is the definition of Ethnocentric." },
+                    { t: "They look for global similarities across all borders.", isCorrect: false, e: "❌ Incorrect. This is the definition of Geocentric." },
+                    { t: "They believe every foreign market is unique and grant local managers total autonomy.", isCorrect: true, e: "✅ Correct. Polycentric firms adapt to everything, which maximizes local relevance but sacrifices economies of scale." },
+                    { t: "They only sell products digitally.", isCorrect: false, e: "❌ Incorrect. The EPRG framework applies to both physical and digital goods." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "What does 'Administrative Distance' refer to in international marketing?",
+                opts: [
+                    { t: "The physical miles between headquarters and a subsidiary.", isCorrect: false, e: "❌ Incorrect. That is Geographic Distance." },
+                    { t: "The difference in cultural values between two nations.", isCorrect: false, e: "❌ Incorrect. That is Cultural or Psychic Distance." },
+                    { t: "The level of bureaucracy, corruption, legal, and institutional differences between nations.", isCorrect: true, e: "✅ Correct. High administrative distance means dealing with vastly different red tape, taxes, and government structures." },
+                    { t: "The cost difference in management salaries.", isCorrect: false, e: "❌ Incorrect. This relates to economic cost structures, not administrative frameworks." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "According to the Week 1 framework, which of the following is an 'uncontrollable' element for an international marketer?",
+                opts: [
+                    { t: "The physical product design.", isCorrect: false, e: "❌ Incorrect. The marketer controls the product design." },
+                    { t: "The promotional budget.", isCorrect: false, e: "❌ Incorrect. The firm controls how much money it spends." },
+                    { t: "The foreign political and legal environment.", isCorrect: true, e: "✅ Correct. Marketers cannot control foreign governments, tariffs, or laws; they can only adapt to them." },
+                    { t: "The choice of distribution channel.", isCorrect: false, e: "❌ Incorrect. The firm chooses whether to use direct or indirect distribution." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "Which approach is most prone to the dangerous 'Self-Reference Criterion' bias?",
+                opts: [
+                    { t: "Geocentric.", isCorrect: false, e: "❌ Incorrect. Geocentric relies on global insights, not just home-country bias." },
+                    { t: "Polycentric.", isCorrect: false, e: "❌ Incorrect. Polycentric relies on local managers, eliminating home-country bias." },
+                    { t: "Ethnocentric.", isCorrect: true, e: "✅ Correct. Ethnocentric firms assume their home culture's way of doing things is universally applicable, causing disastrous blind spots." },
+                    { t: "Regiocentric.", isCorrect: false, e: "❌ Incorrect. Regiocentric focuses on a specific region (like all of Europe), not just the home country." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "How does the physical 'Infrastructure' of a host country impact international marketing?",
+                opts: [
+                    { t: "It determines the local language spoken.", isCorrect: false, e: "❌ Incorrect. Language is a socio-cultural factor." },
+                    { t: "It dictates physical distribution and communication capabilities.", isCorrect: true, e: "✅ Correct. A lack of paved roads, cold-chain storage, or internet access severely limits how a product can be delivered and advertised." },
+                    { t: "It establishes the import tariff rate.", isCorrect: false, e: "❌ Incorrect. Tariffs are set by political treaties, not physical infrastructure." },
+                    { t: "It prevents product standardization.", isCorrect: false, e: "❌ Incorrect. Poor infrastructure might affect distribution, but the product itself can still be standardized." }
+                ]
+            },
+            {
+                c: "Week 1",
+                q: "What is the ultimate goal of an International Strategic Marketing Plan?",
+                opts: [
+                    { t: "To ensure prices are exactly the same in every country.", isCorrect: false, e: "❌ Incorrect. Varying local economies make identical pricing impossible." },
+                    { t: "To eliminate all cultural differences globally.", isCorrect: false, e: "❌ Incorrect. Marketers cannot erase cultures; they navigate them." },
+                    { t: "To create a sustainable competitive advantage across borders.", isCorrect: true, e: "✅ Correct. The goal is to navigate the global/local tension to outperform competitors and achieve long-term profitability." },
+                    { t: "To rely solely on digital, borderless marketing.", isCorrect: false, e: "❌ Incorrect. Most products still require physical distribution strategies." }
+                ]
+            },
+
+            // --- WEEK 2: ENVIRONMENT (Q13 - Q24) ---
+            {
+                c: "Week 2",
+                q: "When a UK firm evaluates expanding to Brazil, they note that Brazil recently raised import tariffs by 15%. In a PESTEL analysis, this falls under:",
+                opts: [
+                    { t: "Technological", isCorrect: false, e: "❌ Incorrect. Tariffs have nothing to do with digital infrastructure, IP, or automation." },
+                    { t: "Social", isCorrect: false, e: "❌ Incorrect. Social factors cover demographics, urbanization, and cultural trends." },
+                    { t: "Political / Legal", isCorrect: true, e: "✅ Correct. Tariffs, trade embargoes, and taxation policies are actions taken by governments, falling squarely under Political and Legal constraints." },
+                    { t: "Environmental", isCorrect: false, e: "❌ Incorrect. Environmental covers climate change, carbon taxes, and sustainability laws." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In Porter's Five Forces, which scenario makes an industry HIGHLY attractive (profitable)?",
+                opts: [
+                    { t: "High Threat of Substitutes.", isCorrect: false, e: "❌ Incorrect. If consumers can easily find alternative ways to solve their problem, your pricing power drops." },
+                    { t: "High Barriers to Entry.", isCorrect: true, e: "✅ Correct. High barriers (like strict patents or massive capital requirements) keep new competitors out, protecting the profits of the firms already inside." },
+                    { t: "High Buyer Power.", isCorrect: false, e: "❌ Incorrect. If buyers have high power (e.g., Walmart buying in massive bulk), they will force you to lower your prices." },
+                    { t: "Intense Competitive Rivalry.", isCorrect: false, e: "❌ Incorrect. Fierce rivalry means constant price wars and heavy marketing spend, which drains profits." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "Which PESTEL factor covers 'Currency Exchange Rates'?",
+                opts: [
+                    { t: "Political", isCorrect: false, e: "❌ Incorrect. While politics can influence rates, the rates themselves are economic metrics." },
+                    { t: "Economic", isCorrect: true, e: "✅ Correct. Fluctuating exchange rates, inflation, and interest rates directly impact a firm's pricing strategy and profit margins." },
+                    { t: "Social", isCorrect: false, e: "❌ Incorrect. Social deals with people and culture." },
+                    { t: "Legal", isCorrect: false, e: "❌ Incorrect. Legal deals with legislation, not monetary value." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "What is the primary purpose of Porter's Diamond of National Advantage?",
+                opts: [
+                    { t: "To evaluate a single company's internal strengths.", isCorrect: false, e: "❌ Incorrect. That is what a SWOT analysis does." },
+                    { t: "To assess the macro-environment of a target country.", isCorrect: false, e: "❌ Incorrect. That is what PESTEL does." },
+                    { t: "To explain why certain countries dominate specific global industries.", isCorrect: true, e: "✅ Correct. It analyzes why nations like Germany excel at automotive engineering or Switzerland at watchmaking." },
+                    { t: "To calculate international shipping costs.", isCorrect: false, e: "❌ Incorrect. Porter's Diamond has nothing to do with freight calculations." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In Porter's Diamond, what are 'Demand Conditions'?",
+                opts: [
+                    { t: "The global demand for raw materials.", isCorrect: false, e: "❌ Incorrect. It focuses on the *domestic* market." },
+                    { t: "The presence of highly sophisticated, demanding local consumers.", isCorrect: true, e: "✅ Correct. Demanding home buyers force local companies to innovate and improve quality, making them globally competitive." },
+                    { t: "The government's demand for taxes.", isCorrect: false, e: "❌ Incorrect. Taxes belong under Factor Conditions or PESTEL." },
+                    { t: "The lack of demand causing firms to export.", isCorrect: false, e: "❌ Incorrect. It refers to the *quality* of demand, not the lack thereof." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In the Value Chain, is 'Inbound Logistics' a Primary or Support activity?",
+                opts: [
+                    { t: "Support Activity.", isCorrect: false, e: "❌ Incorrect. Support activities are HR, Tech Development, and Procurement." },
+                    { t: "Primary Activity.", isCorrect: true, e: "✅ Correct. It directly involves the physical receiving, warehousing, and inventory control of raw materials needed to make the product." },
+                    { t: "Secondary Activity.", isCorrect: false, e: "❌ Incorrect. The Value Chain uses the terms 'Primary' and 'Support'." },
+                    { t: "Tertiary Activity.", isCorrect: false, e: "❌ Incorrect. This is not a Value Chain term." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In Porter's 5 Forces, what is a 'Substitute'?",
+                opts: [
+                    { t: "A direct competitor selling the exact same item.", isCorrect: false, e: "❌ Incorrect. That is 'Competitive Rivalry'." },
+                    { t: "A product from a completely different industry that solves the same customer problem.", isCorrect: true, e: "✅ Correct. For example, a video streaming service (Netflix) is a substitute for a physical movie theater." },
+                    { t: "A cheaper raw material used in manufacturing.", isCorrect: false, e: "❌ Incorrect. That relates to Supplier Power." },
+                    { t: "An alternative advertising channel.", isCorrect: false, e: "❌ Incorrect. Substitutes refer to the end product, not marketing channels." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "What does 'Expropriation' mean in a Political risk context?",
+                opts: [
+                    { t: "A government seizing foreign-owned assets without fair compensation.", isCorrect: true, e: "✅ Correct. This is the ultimate political risk (e.g., a host country nationalizing a foreign oil refinery)." },
+                    { t: "Exporting goods below the cost of production.", isCorrect: false, e: "❌ Incorrect. That is called 'Dumping'." },
+                    { t: "Paying bribes to foreign officials.", isCorrect: false, e: "❌ Incorrect. That is corruption/FCPA violation." },
+                    { t: "A sudden drop in currency value.", isCorrect: false, e: "❌ Incorrect. That is an Economic risk." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In a SWOT analysis, where do PESTEL factors belong?",
+                opts: [
+                    { t: "Strengths and Weaknesses.", isCorrect: false, e: "❌ Incorrect. Strengths and Weaknesses evaluate the *internal* capabilities of the firm." },
+                    { t: "Opportunities and Threats.", isCorrect: true, e: "✅ Correct. PESTEL scans the *external* environment, which presents opportunities to exploit or threats to mitigate." },
+                    { t: "Only in Threats.", isCorrect: false, e: "❌ Incorrect. External factors like a booming economy represent massive Opportunities." },
+                    { t: "They do not belong in SWOT.", isCorrect: false, e: "❌ Incorrect. SWOT relies heavily on environmental scanning frameworks." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "True or False: In Porter's Diamond, a strong domestic rivalry hurts a firm's global chances.",
+                opts: [
+                    { t: "True.", isCorrect: false, e: "❌ Incorrect. A lack of domestic competition makes firms lazy and weak." },
+                    { t: "False.", isCorrect: true, e: "✅ Correct. Porter argues that fierce domestic competition acts like a training ground, forcing firms to become highly efficient and innovative before they compete globally." },
+                    { t: "Only true for SMEs.", isCorrect: false, e: "❌ Incorrect. The principle applies universally across firm sizes." },
+                    { t: "Only true in emerging markets.", isCorrect: false, e: "❌ Incorrect. It applies universally to national advantage." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "In the Value Chain, 'Human Resource Management' is classified as:",
+                opts: [
+                    { t: "A Primary Activity.", isCorrect: false, e: "❌ Incorrect. HR does not physically build or sell the product." },
+                    { t: "A Support Activity.", isCorrect: true, e: "✅ Correct. HR facilitates the primary activities by ensuring the company has the right talent and training to operate." },
+                    { t: "An External Threat.", isCorrect: false, e: "❌ Incorrect. HR is an internal function." },
+                    { t: "Inbound Logistics.", isCorrect: false, e: "❌ Incorrect. Inbound logistics handles physical inventory, not personnel." }
+                ]
+            },
+            {
+                c: "Week 2",
+                q: "Which PESTEL factor covers 'Aging Populations and Urbanization'?",
+                opts: [
+                    { t: "Economic", isCorrect: false, e: "❌ Incorrect. Economics covers money and growth metrics." },
+                    { t: "Technological", isCorrect: false, e: "❌ Incorrect. This covers digital infrastructure and R&D." },
+                    { t: "Social", isCorrect: true, e: "✅ Correct. Shifts in population age, lifestyle, and urbanization dictate what products society will desire." },
+                    { t: "Political", isCorrect: false, e: "❌ Incorrect. Demographics are distinct from government policy." }
+                ]
+            },
+
+            // --- WEEK 3: PRODUCT (Q25 - Q36) ---
+            {
+                c: "Week 3",
+                q: "When evaluating International Product Decisions, what constitutes the 'Augmented Product'?",
+                opts: [
+                    { t: "The fundamental benefit the consumer is buying.", isCorrect: false, e: "❌ Incorrect. This is the definition of the 'Core Product'." },
+                    { t: "The physical design, brand logo, and packaging.", isCorrect: false, e: "❌ Incorrect. This is the definition of the 'Actual Product'." },
+                    { t: "The after-sales service, warranties, and delivery networks.", isCorrect: true, e: "✅ Correct. The Augmented Product includes all the non-physical support services that add extra value." },
+                    { t: "The legal safety certifications.", isCorrect: false, e: "❌ Incorrect. Safety certifications are mandatory adaptations applied to the Actual Product." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What is the Country of Origin (COO) Effect?",
+                opts: [
+                    { t: "A tax applied based on shipping origin.", isCorrect: false, e: "❌ Incorrect. That refers to tariffs." },
+                    { t: "The psychological bias where consumers judge a product's quality based on where it was manufactured.", isCorrect: true, e: "✅ Correct. For example, consumers globally assume 'Made in Germany' implies superior engineering." },
+                    { t: "A legal requirement for labeling.", isCorrect: false, e: "❌ Incorrect. While this is a law, the 'Effect' refers to the psychological impact on the consumer." },
+                    { t: "The requirement to hire local managers.", isCorrect: false, e: "❌ Incorrect. This relates to HR strategy." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What is 'Mandatory Adaptation'?",
+                opts: [
+                    { t: "Changes dictated by law, safety regulations, or absolute geographical need.", isCorrect: true, e: "✅ Correct. For example, changing a plug from 110v to 220v so it legally and safely operates in Europe." },
+                    { t: "Changes made to better align with local taste preferences.", isCorrect: false, e: "❌ Incorrect. That is called Discretionary (or Optional) Adaptation." },
+                    { t: "Creating a completely new product from scratch.", isCorrect: false, e: "❌ Incorrect. That is called Product Invention." },
+                    { t: "Translating the instruction manual.", isCorrect: false, e: "❌ Incorrect. Translation is part of communication, not physical product modification." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What is 'Discretionary (Optional) Adaptation'?",
+                opts: [
+                    { t: "Changes made to meet electrical safety laws.", isCorrect: false, e: "❌ Incorrect. That is Mandatory Adaptation." },
+                    { t: "Changes made to better align with local tastes and preferences to increase market share.", isCorrect: true, e: "✅ Correct. For example, a fast-food chain adding spicy local flavors to a burger menu." },
+                    { t: "Creating a brand new brand name.", isCorrect: false, e: "❌ Incorrect. While naming changes are discretionary, adaptation usually refers to the physical product features." },
+                    { t: "Ignoring local culture entirely.", isCorrect: false, e: "❌ Incorrect. This is standardization." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What is 'Product Invention'?",
+                opts: [
+                    { t: "Filing a patent in a foreign country.", isCorrect: false, e: "❌ Incorrect. This is a legal protection step." },
+                    { t: "Selling the exact same product abroad as at home.", isCorrect: false, e: "❌ Incorrect. This is Product Extension (Standardization)." },
+                    { t: "Creating an entirely new product from scratch for a foreign market.", isCorrect: true, e: "✅ Correct. Used when simply extending or slightly adapting a home-country product will not work due to extreme market differences." },
+                    { t: "Changing the packaging color.", isCorrect: false, e: "❌ Incorrect. That is a minor actual product adaptation." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "How do 'Consumer Income Levels' dictate product decisions?",
+                opts: [
+                    { t: "They don't; premium products always sell everywhere.", isCorrect: false, e: "❌ Incorrect. Income disparity is a massive factor in global marketing." },
+                    { t: "Firms must often strip down products to make them affordable in developing nations.", isCorrect: true, e: "✅ Correct. A luxury car brand might remove premium features to lower the entry price point in India." },
+                    { t: "They only affect B2B sales.", isCorrect: false, e: "❌ Incorrect. Income levels heavily dictate B2C retail sales." },
+                    { t: "They force firms to use Joint Ventures.", isCorrect: false, e: "❌ Incorrect. Entry modes are separate from product design decisions." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What is a 'Product Line Extension'?",
+                opts: [
+                    { t: "Extending the warranty period.", isCorrect: false, e: "❌ Incorrect. That is an Augmented Product change." },
+                    { t: "Adding new variations to an existing product category to capture a new demographic.", isCorrect: true, e: "✅ Correct. An example is LEGO launching 'LEGO Friends' to capture the underserved female demographic." },
+                    { t: "Moving the factory to a new country.", isCorrect: false, e: "❌ Incorrect. That is a supply chain/FDI move." },
+                    { t: "Selling the company to a competitor.", isCorrect: false, e: "❌ Incorrect. That is an acquisition." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "What does 'Ease of Distribution' refer to in product policy?",
+                opts: [
+                    { t: "How quickly an ad runs on social media.", isCorrect: false, e: "❌ Incorrect. Distribution refers to physical logistics." },
+                    { t: "The physical infrastructure, climate, and retail networks available to move the product.", isCorrect: true, e: "✅ Correct. If a country lacks cold-chain refrigerator trucks, you cannot sell frozen foods there without massive product spoilage." },
+                    { t: "The language used on the packaging.", isCorrect: false, e: "❌ Incorrect. Language is part of the Actual Product and Communication." },
+                    { t: "The intellectual property laws of the target country.", isCorrect: false, e: "❌ Incorrect. IP laws are a PESTEL (Legal) factor." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "Why is 'Brand Equity' important for products?",
+                opts: [
+                    { t: "It allows companies to launch new products with instant consumer trust.", isCorrect: true, e: "✅ Correct. Swiss Army used its knife's equity (reputation for durability) to successfully sell watches and luggage." },
+                    { t: "It eliminates the need to pay import tariffs.", isCorrect: false, e: "❌ Incorrect. Tariffs apply regardless of how famous a brand is." },
+                    { t: "It prevents competitors from advertising.", isCorrect: false, e: "❌ Incorrect. Competitors can still advertise." },
+                    { t: "It guarantees a successful Joint Venture.", isCorrect: false, e: "❌ Incorrect. JVs fail often due to management clashes, regardless of brand equity." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "Can the Country of Origin (COO) effect be negative?",
+                opts: [
+                    { t: "No, consumers always prefer imported goods.", isCorrect: false, e: "❌ Incorrect. Consumers frequently boycott goods from certain origins." },
+                    { t: "Yes, if a country has a reputation for poor manufacturing or unsafe labor.", isCorrect: true, e: "✅ Correct. If a nation is known for cheap, easily broken electronics, consumers will avoid products bearing its label." },
+                    { t: "Only in the automotive industry.", isCorrect: false, e: "❌ Incorrect. It applies to fashion, food, electronics, and more." },
+                    { t: "Only if the product is standardized.", isCorrect: false, e: "❌ Incorrect. COO applies to both standardized and adapted products." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "The 'Core Product' refers to:",
+                opts: [
+                    { t: "The packaging and logo.", isCorrect: false, e: "❌ Incorrect. That is the Actual Product." },
+                    { t: "The fundamental benefit or problem-solving service the consumer is buying.", isCorrect: true, e: "✅ Correct. You don't buy a drill; you buy 'the ability to make a hole'." },
+                    { t: "The warranty.", isCorrect: false, e: "❌ Incorrect. That is the Augmented Product." },
+                    { t: "The shipping method.", isCorrect: false, e: "❌ Incorrect. That is Distribution/Place." }
+                ]
+            },
+            {
+                c: "Week 3",
+                q: "Why might packaging require adaptation?",
+                opts: [
+                    { t: "Only to save money on cardboard.", isCorrect: false, e: "❌ Incorrect. Adaptation usually increases costs." },
+                    { t: "To comply with language laws, recycling regulations, or cultural color associations.", isCorrect: true, e: "✅ Correct. For instance, white represents mourning in some Asian cultures, making it a terrible choice for festive gift packaging." },
+                    { t: "Packaging never requires adaptation.", isCorrect: false, e: "❌ Incorrect. It is one of the most frequently adapted elements." },
+                    { t: "Only when using a Pull strategy.", isCorrect: false, e: "❌ Incorrect. Communication strategies are separate from physical packaging laws." }
+                ]
+            },
+
+            // --- WEEK 4: CULTURE (Q37 - Q50) ---
+            {
+                c: "Week 4",
+                q: "According to Hofstede, how do cultures with 'High Uncertainty Avoidance' behave?",
+                opts: [
+                    { t: "They embrace rapid innovation and rule-breaking.", isCorrect: false, e: "❌ Incorrect. This describes Low Uncertainty Avoidance." },
+                    { t: "They prioritize group harmony over individual success.", isCorrect: false, e: "❌ Incorrect. This describes Collectivism." },
+                    { t: "They feel threatened by ambiguity, heavily relying on strict rules and absolute truths.", isCorrect: true, e: "✅ Correct. These cultures (like Japan or Germany) hate the unknown. Marketers must provide detailed instructions and ironclad warranties." },
+                    { t: "They accept that power is distributed unequally.", isCorrect: false, e: "❌ Incorrect. This describes High Power Distance." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What is the Self-Reference Criterion (SRC) in international marketing?",
+                opts: [
+                    { t: "A tool used to evaluate competitor pricing.", isCorrect: false, e: "❌ Incorrect. That is competitive analysis." },
+                    { t: "Translating an advertisement back into its original language.", isCorrect: false, e: "❌ Incorrect. That is Back-Translation." },
+                    { t: "The unconscious tendency to evaluate a foreign market using one's own cultural values and norms.", isCorrect: true, e: "✅ Correct. It is a massive blind spot. Assuming an ad funny in London will automatically be funny in Tokyo leads to disaster." },
+                    { t: "The belief that all cultures are merging.", isCorrect: false, e: "❌ Incorrect. That describes cultural homogenization." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "How do Schiffman and Kanuk define Culture?",
+                opts: [
+                    { t: "The legal framework of a nation.", isCorrect: false, e: "❌ Incorrect. That is the Political/Legal environment." },
+                    { t: "The sum total of learned beliefs, values, and customs directing behavior.", isCorrect: true, e: "✅ Correct. Culture acts as the invisible operating system or 'personality' of a society." },
+                    { t: "The physical infrastructure of a society.", isCorrect: false, e: "❌ Incorrect. That is the Technological/Economic environment." },
+                    { t: "Biological traits inherited by a demographic.", isCorrect: false, e: "❌ Incorrect. Culture is learned, not biologically inherited." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What defines a 'High-Context' culture?",
+                opts: [
+                    { t: "Communication is direct, explicit, and literal.", isCorrect: false, e: "❌ Incorrect. This defines a Low-Context culture." },
+                    { t: "Communication relies heavily on non-verbal cues, history, and relationships.", isCorrect: true, e: "✅ Correct. In high-context cultures (like Japan or Saudi Arabia), *how* you say it and *who* is saying it matters more than the literal words." },
+                    { t: "People yell frequently.", isCorrect: false, e: "❌ Incorrect. Context refers to meaning, not volume." },
+                    { t: "They have a high GDP.", isCorrect: false, e: "❌ Incorrect. Context is cultural, not economic." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "Why is humor highly dangerous in cross-cultural advertising?",
+                opts: [
+                    { t: "It is too expensive to film comedians.", isCorrect: false, e: "❌ Incorrect. Production costs are similar." },
+                    { t: "What is funny in one culture may be deeply offensive or confusing in another.", isCorrect: true, e: "✅ Correct. Humor is heavily reliant on cultural context, idioms, and shared history, which do not translate well." },
+                    { t: "It violates WTO laws.", isCorrect: false, e: "❌ Incorrect. The WTO does not regulate humor." },
+                    { t: "It distracts from the core product.", isCorrect: false, e: "❌ Incorrect. While true domestically, the primary international danger is offense." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "In Hofstede's framework, what is 'Power Distance (PDI)'?",
+                opts: [
+                    { t: "The physical distance between headquarters and a subsidiary.", isCorrect: false, e: "❌ Incorrect. That is Geographic Distance." },
+                    { t: "The degree to which unequal distribution of power is accepted by the less powerful members.", isCorrect: true, e: "✅ Correct. High PDI cultures respect strict hierarchy and titles without question." },
+                    { t: "The gap between male and female wages.", isCorrect: false, e: "❌ Incorrect. Gender roles are covered under Masculinity vs. Femininity." },
+                    { t: "The amount of energy a country consumes.", isCorrect: false, e: "❌ Incorrect. That is an environmental/infrastructure metric." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What is 'Individualism vs. Collectivism'?",
+                opts: [
+                    { t: "Choosing between single products or bulk buying.", isCorrect: false, e: "❌ Incorrect. This is a cultural dimension, not a retail strategy." },
+                    { t: "Focus on the 'I' (self-reliance) versus the 'We' (group harmony).", isCorrect: true, e: "✅ Correct. In collectivist cultures, ads should appeal to family and community benefit, rather than personal rebellion." },
+                    { t: "Choosing between direct exporting or joint ventures.", isCorrect: false, e: "❌ Incorrect. Those are entry modes." },
+                    { t: "The gap between rich and poor.", isCorrect: false, e: "❌ Incorrect. That relates to economic disparity." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What is 'Masculinity vs. Femininity' in Hofstede's model?",
+                opts: [
+                    { t: "The ratio of men to women in a country.", isCorrect: false, e: "❌ Incorrect. It measures values, not demographics." },
+                    { t: "Preference for achievement/material success vs. caring/quality of life.", isCorrect: true, e: "✅ Correct. Masculine cultures respond well to status symbols and aggressive competition; feminine cultures value modesty and consensus." },
+                    { t: "Selling products specifically to one gender.", isCorrect: false, e: "❌ Incorrect. This is demographic segmentation." },
+                    { t: "The legal rights of women in a country.", isCorrect: false, e: "❌ Incorrect. That is a Political/Legal factor." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What is 'Back-Translation'?",
+                opts: [
+                    { t: "Translating a competitor's website to steal their ideas.", isCorrect: false, e: "❌ Incorrect. It is a quality control tool." },
+                    { t: "Translating text into a foreign language, then having a different person translate it back.", isCorrect: true, e: "✅ Correct. It is essential to ensure that cultural nuance and meaning are not lost in the original translation." },
+                    { t: "Translating a survey after the data is collected.", isCorrect: false, e: "❌ Incorrect. It must be done before the survey is distributed." },
+                    { t: "Using Google Translate backward.", isCorrect: false, e: "❌ Incorrect. Machine translation often fails at grasping cultural nuance." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "Why does IKEA adapt its catalog imagery globally?",
+                opts: [
+                    { t: "To hide its prices from competitors.", isCorrect: false, e: "❌ Incorrect. Prices are public knowledge." },
+                    { t: "To reflect local living spaces, cultural norms, and family dynamics.", isCorrect: true, e: "✅ Correct. Japanese catalogs show smaller rooms to reflect reality; Saudi catalogs adhere to local modesty norms." },
+                    { t: "Because they sell completely different furniture in every country.", isCorrect: false, e: "❌ Incorrect. IKEA's furniture (Actual Product) is highly standardized." },
+                    { t: "To avoid paying international shipping taxes.", isCorrect: false, e: "❌ Incorrect. Catalogs do not affect shipping taxes." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "If an ad focuses heavily on personal rebellion and standing out from the crowd, what culture does it target?",
+                opts: [
+                    { t: "High Uncertainty Avoidance.", isCorrect: false, e: "❌ Incorrect. They hate unpredictability and rebellion." },
+                    { t: "High Individualism.", isCorrect: true, e: "✅ Correct. Rebellion appeals to individual expression and self-reliance, not group harmony." },
+                    { t: "High Collectivism.", isCorrect: false, e: "❌ Incorrect. They value blending in and group cohesion." },
+                    { t: "High Power Distance.", isCorrect: false, e: "❌ Incorrect. They respect authority and would view rebellion negatively." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "How does high Uncertainty Avoidance affect product launches?",
+                opts: [
+                    { t: "Consumers instantly buy the newest, untested technology.", isCorrect: false, e: "❌ Incorrect. They avoid untested items." },
+                    { t: "Consumers are slow to adopt new innovations.", isCorrect: true, e: "✅ Correct. Marketers must offer free trials, testimonials, or ironclad guarantees to lower the perceived risk." },
+                    { t: "Consumers ignore warranties.", isCorrect: false, e: "❌ Incorrect. Warranties are essential in these cultures." },
+                    { t: "It makes standardization impossible.", isCorrect: false, e: "❌ Incorrect. The product can be standard, but the marketing (guarantees) must adapt." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "What is 'Ethnocentrism' in a cultural marketing context?",
+                opts: [
+                    { t: "The belief that one's own culture is superior or the standard.", isCorrect: true, e: "✅ Correct. It causes managers to arrogantly ignore local market realities and push home-country strategies that fail." },
+                    { t: "The blending of two cultures into one.", isCorrect: false, e: "❌ Incorrect. That is homogenization." },
+                    { t: "Hiring only local foreign managers.", isCorrect: false, e: "❌ Incorrect. That is a Polycentric approach." },
+                    { t: "Selling products exclusively to minority ethnic groups.", isCorrect: false, e: "❌ Incorrect. That is niche demographic targeting." }
+                ]
+            },
+            {
+                c: "Week 4",
+                q: "Is 'Psychic Distance' one of Hofstede's cultural dimensions?",
+                opts: [
+                    { t: "Yes.", isCorrect: false, e: "❌ Incorrect. Hofstede's dimensions are PDI, IDV, MAS, and UAI." },
+                    { t: "No.", isCorrect: true, e: "✅ Correct. Psychic Distance relates to market entry strategy and perceived similarity, not the core cultural values measured by Hofstede." },
+                    { t: "Only in the revised 2010 model.", isCorrect: false, e: "❌ Incorrect." },
+                    { t: "Yes, it replaced Power Distance.", isCorrect: false, e: "❌ Incorrect." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "What does the MACS Matrix primarily evaluate?",
+                opts: [
+                    { t: "The internal accounting costs of a company.", isCorrect: false, e: "❌ Incorrect. Accounting costs are handled by financial audits, not the MACS matrix." },
+                    { t: "The cultural differences between two countries.", isCorrect: false, e: "❌ Incorrect. That is measured by Hofstede's dimensions or Psychic Distance." },
+                    { t: "Market Attractiveness against the firm's Competitive Strength.", isCorrect: true, e: "✅ Correct. It is a systematic tool used by large enterprises to score how lucrative a market is versus how capable the firm is of winning there." },
+                    { t: "The pricing strategy of competitors.", isCorrect: false, e: "❌ Incorrect. Competitor pricing is a micro-environmental factor." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "What is the 'Opportunistic Approach' to market selection?",
+                opts: [
+                    { t: "Using complex algorithms to find hidden markets.", isCorrect: false, e: "❌ Incorrect. This defines a systematic screening approach." },
+                    { t: "Entering a market purely based on unsolicited orders or low psychic distance.", isCorrect: true, e: "✅ Correct. SMEs often lack the budget for massive research, so they opportunistically follow leads or expand to culturally familiar neighbors." },
+                    { t: "Buying out a competitor when their stock drops.", isCorrect: false, e: "❌ Incorrect. That is an opportunistic acquisition, not market selection." },
+                    { t: "Always choosing Foreign Direct Investment.", isCorrect: false, e: "❌ Incorrect. Opportunistic entries usually use low-risk modes like exporting." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "Which of the following is true about 'Psychic Distance'?",
+                opts: [
+                    { t: "It is the exact physical mileage between two countries.", isCorrect: false, e: "❌ Incorrect. Physical mileage is Geographic Distance." },
+                    { t: "It refers to the perceived differences in culture, language, and business practices.", isCorrect: true, e: "✅ Correct. A UK firm feels a low psychic distance to Australia (shared language/history), making expansion feel less risky." },
+                    { t: "High psychic distance guarantees high profits.", isCorrect: false, e: "❌ Incorrect. High psychic distance usually increases the risk of failure due to the SRC." },
+                    { t: "It was invented by Michael Porter.", isCorrect: false, e: "❌ Incorrect. It originates from the Uppsala Internationalization Model." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "A firm wants to expand but refuses to take on any financial risk or manage international shipping. Which mode is best?",
+                opts: [
+                    { t: "Direct Exporting.", isCorrect: false, e: "❌ Incorrect. Direct exporting requires the firm to handle the shipping and international distributors." },
+                    { t: "Indirect Exporting.", isCorrect: true, e: "✅ Correct. The firm sells to a domestic intermediary in their own country, who then handles all the international export logistics and risk." },
+                    { t: "Licensing.", isCorrect: false, e: "❌ Incorrect. Licensing exposes the firm to IP theft risks." },
+                    { t: "Joint Venture.", isCorrect: false, e: "❌ Incorrect. A JV requires significant financial investment and shared risk." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "What is a primary disadvantage of Licensing?",
+                opts: [
+                    { t: "It requires massive upfront capital.", isCorrect: false, e: "❌ Incorrect. Licensing is highly capital-efficient because the licensee pays for operations." },
+                    { t: "It bypasses all local import tariffs.", isCorrect: false, e: "❌ Incorrect. Bypassing tariffs is an advantage, not a disadvantage." },
+                    { t: "The firm risks creating a future competitor by sharing its intellectual property.", isCorrect: true, e: "✅ Correct. Once the licensee learns the technology or business model, they may break the contract and start their own rival company." },
+                    { t: "It grants the licensor 100% control over the foreign market.", isCorrect: false, e: "❌ Incorrect. The licensor actually gives up daily operational control to the licensee." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "How does Franchising differ from standard Licensing?",
+                opts: [
+                    { t: "Franchising is only used for physical products, not services.", isCorrect: false, e: "❌ Incorrect. Franchising is heavily used for services (e.g., fast food, hotels)." },
+                    { t: "Franchising requires the parent company to pay the local partner.", isCorrect: false, e: "❌ Incorrect. The local partner pays the parent company a franchise fee." },
+                    { t: "Franchising includes strict operational rules, quality controls, and ongoing management support.", isCorrect: true, e: "✅ Correct. McDonald's doesn't just license its name; it dictates exactly how long fries must cook and provides ongoing training." },
+                    { t: "Franchising involves zero legal contracts.", isCorrect: false, e: "❌ Incorrect. Franchising involves incredibly strict and complex legal contracts." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "A 'Joint Venture' (JV) is distinct from a 'Strategic Alliance' because a JV:",
+                opts: [
+                    { t: "Is entirely illegal under WTO rules.", isCorrect: false, e: "❌ Incorrect. JVs are perfectly legal and often encouraged by host governments." },
+                    { t: "Creates a brand new, legally separate third corporate entity.", isCorrect: true, e: "✅ Correct. Two parent companies share equity to birth a new child company. An alliance is usually just a contractual handshake." },
+                    { t: "Involves no shared financial risk.", isCorrect: false, e: "❌ Incorrect. A JV requires significant shared financial investment." },
+                    { t: "Grants one partner 100% of the profits.", isCorrect: false, e: "❌ Incorrect. Profits in a JV are split according to equity ownership." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "According to Transaction Cost Analysis (TCA), when should a firm use Foreign Direct Investment (FDI)?",
+                opts: [
+                    { t: "When the firm is very small and lacks capital.", isCorrect: false, e: "❌ Incorrect. FDI is incredibly expensive and usually reserved for large firms." },
+                    { t: "When the friction, cost, and risk of opportunistic behavior by external partners are too high.", isCorrect: true, e: "✅ Correct. If a sales agent might steal your clients, TCA dictates it is cheaper in the long run to just own the operation yourself (Internalize/FDI)." },
+                    { t: "When psychic distance is zero.", isCorrect: false, e: "❌ Incorrect. TCA focuses on transaction frictions, not psychic distance." },
+                    { t: "When the product is heavily standardized.", isCorrect: false, e: "❌ Incorrect. Product standardization does not dictate the entry mode." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "What defines a 'Born Global' firm?",
+                opts: [
+                    { t: "A firm that targets international markets from its inception.", isCorrect: true, e: "✅ Correct. Often tech startups, these firms skip the traditional slow domestic growth phase and launch globally on day one." },
+                    { t: "A company that has operated internationally for over 100 years.", isCorrect: false, e: "❌ Incorrect. That describes a mature multinational enterprise (MNE)." },
+                    { t: "A state-owned enterprise.", isCorrect: false, e: "❌ Incorrect. Government ownership has nothing to do with being Born Global." },
+                    { t: "A firm that only uses indirect exporting.", isCorrect: false, e: "❌ Incorrect. Born Globals use various modes, often relying heavily on digital platforms." }
+                ]
+            },
+            {
+                c: "Week 5&6: Entry Modes",
+                q: "What is the 'Psychic Distance Paradox'?",
+                opts: [
+                    { t: "The further away a country is, the easier it is to sell there.", isCorrect: false, e: "❌ Incorrect. This is illogical." },
+                    { t: "Firms failing in culturally similar markets because they arrogantly assume everything is identical.", isCorrect: true, e: "✅ Correct. A UK firm entering the USA might assume no adaptation is needed, leading to careless, disastrous mistakes." },
+                    { t: "The physical distance between two subsidiaries.", isCorrect: false, e: "❌ Incorrect. Psychic distance deals with perception, not physical mileage." },
+                    { t: "The inability to translate advertising copy.", isCorrect: false, e: "❌ Incorrect. While translation is part of psychic distance, the paradox relates to managerial overconfidence." }
+                ]
+            },
+
+            // --- WEEK 7: COMMUNICATION (Q61 - Q70) ---
+            {
+                c: "Week 7: Comms",
+                q: "In the international communication model, what is 'Decoding'?",
+                opts: [
+                    { t: "The sender creating the advertisement.", isCorrect: false, e: "❌ Incorrect. The sender 'Encodes' the message." },
+                    { t: "The process of translating the ad into English.", isCorrect: false, e: "❌ Incorrect. Translation is part of Encoding." },
+                    { t: "How the consumer interprets and understands the received message.", isCorrect: true, e: "✅ Correct. If the consumer decodes the message differently than the sender intended (due to cultural noise), the campaign fails." },
+                    { t: "The budget spent on the media channel.", isCorrect: false, e: "❌ Incorrect. Budgeting is an administrative function." }
+                ]
+            },
+            {
+                c: "Week 7: Comms",
+                q: "Why might a firm choose to run a completely 'Standardized' global advertising campaign?",
+                opts: [
+                    { t: "To achieve economies of scale and maintain a consistent global brand identity.", isCorrect: true, e: "✅ Correct. Filming one commercial and showing it worldwide saves millions in agency fees and ensures the brand looks identical everywhere." },
+                    { t: "To perfectly align with local humor in every country.", isCorrect: false, e: "❌ Incorrect. Standardized campaigns explicitly sacrifice local cultural alignment." },
+                    { t: "To comply with differing local advertising laws.", isCorrect: false, e: "❌ Incorrect. Standardized ads often run into legal trouble across different borders." },
+                    { t: "To appease local marketing managers.", isCorrect: false, e: "❌ Incorrect. Local managers usually hate standardized ads because they feel irrelevant to their specific market." }
+                ]
+            },
+            {
+                c: "Week 7: Comms",
+                q: "A 'Push' strategy in international marketing focuses primarily on:",
+                opts: [
+                    { t: "Mass media television advertising.", isCorrect: false, e: "❌ Incorrect. Mass media advertising to consumers is a 'Pull' strategy." },
+                    { t: "Social media influencers.", isCorrect: false, e: "❌ Incorrect. Influencers target end-consumers (Pull)." },
+                    { t: "Trade shows, personal selling, and financial incentives to channel members.", isCorrect: true, e: "✅ Correct. It focuses on motivating wholesalers and retailers to stock and 'push' the product onto the retail shelves." },
+                    { t: "Government lobbying to change laws.", isCorrect: false, e: "❌ Incorrect. Lobbying is a political strategy." }
+                ]
+            },
+            {
+                c: "Week 7: Comms",
+                q: "How does the legal environment (PESTEL) directly impact international communication?",
+                opts: [
+                    { t: "It dictates the physical size of the product.", isCorrect: false, e: "❌ Incorrect. That relates to product adaptation." },
+                    { t: "Many countries have strict bans or limits on advertising to children, or advertising alcohol/pharmaceuticals.", isCorrect: true, e: "✅ Correct. A legal commercial in the US might be completely banned from broadcasting in the EU." },
+                    { t: "It controls the language of the country.", isCorrect: false, e: "❌ Incorrect. Language is primarily a socio-cultural factor." },
+                    { t: "It prevents companies from using the internet.", isCorrect: false, e: "❌ Incorrect. While censorship exists, broad internet bans are rare." }
+                ]
+            },
+            {
+                c: "Week 7: Comms",
+                q: "What is 'Pattern Advertising'?",
+                opts: [
+                    { t: "Using geometric shapes in logos.", isCorrect: false, e: "❌ Incorrect. This relates to graphic design." },
+                    { t: "A campaign that provides a global theme or core concept, but allows localized execution.", isCorrect: true, e: "✅ Correct. The tagline might be the same globally, but local subsidiaries cast their own local actors and voiceovers." },
+                    { t: "Advertising only in print magazines.", isCorrect: false, e: "❌ Incorrect. It applies across all media channels." },
+                    { t: "A completely standardized global commercial.", isCorrect: false, e: "❌ Incorrect. Pattern advertising allows for some local flexibility." }
+                ]
+            },
+
+            // --- WEEK 8: PRICING (Q71 - Q80) ---
+            {
+                c: "Week 8: Pricing",
+                q: "Which of the following is the primary cause of 'Price Escalation' in international markets?",
+                opts: [
+                    { t: "Corporate greed and prestige branding.", isCorrect: false, e: "❌ Incorrect. Prestige pricing is deliberate; escalation is largely involuntary." },
+                    { t: "The compounding of international shipping, insurance, import tariffs, and longer distribution channels.", isCorrect: true, e: "✅ Correct. These added logistical and border costs multiply, causing a cheap domestic product to become highly expensive abroad." },
+                    { t: "A drop in domestic manufacturing quality.", isCorrect: false, e: "❌ Incorrect. Quality drops do not cause prices to escalate." },
+                    { t: "Aggressive competitor discounting.", isCorrect: false, e: "❌ Incorrect. Competitor discounting would force prices down, not escalate them." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "What is 'Transfer Pricing'?",
+                opts: [
+                    { t: "The fee paid to a bank to transfer foreign currency.", isCorrect: false, e: "❌ Incorrect. That is an FX transaction fee." },
+                    { t: "The internal, administrative price charged between affiliated subsidiaries across borders.", isCorrect: true, e: "✅ Correct. Multinationals use this to move goods internally, and governments heavily scrutinize it to prevent tax evasion." },
+                    { t: "The price paid to a local transport company.", isCorrect: false, e: "❌ Incorrect. That is a logistics cost." },
+                    { t: "A pricing strategy to drive out competitors.", isCorrect: false, e: "❌ Incorrect. That is called Dumping or Penetration pricing." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "How do 'Grey Markets' (Parallel Imports) usually form?",
+                opts: [
+                    { t: "When a company manufactures counterfeit, fake products.", isCorrect: false, e: "❌ Incorrect. Grey markets involve 100% genuine, authentic goods." },
+                    { t: "When a company sets one identical global price.", isCorrect: false, e: "❌ Incorrect. Identical pricing eliminates the arbitrage opportunity needed for grey markets." },
+                    { t: "When large price discrepancies exist between countries, allowing unauthorized distributors to buy cheap and sell high.", isCorrect: true, e: "✅ Correct. If a camera is £500 in Japan and £1000 in the UK, smugglers will exploit the £500 profit gap." },
+                    { t: "When a government bans a product completely.", isCorrect: false, e: "❌ Incorrect. That creates a Black Market (illegal goods)." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "What is 'Geocentric Pricing'?",
+                opts: [
+                    { t: "Setting one universal global price based on the home country.", isCorrect: false, e: "❌ Incorrect. That is Ethnocentric Pricing." },
+                    { t: "Allowing local managers total autonomy to set prices, ignoring headquarters.", isCorrect: false, e: "❌ Incorrect. That is Polycentric Pricing." },
+                    { t: "Establishing a strategic baseline global price, but allowing coordinated adjustments for local market realities.", isCorrect: true, e: "✅ Correct. It is the smartest approach, balancing local competitiveness while preventing severe Grey Market gaps." },
+                    { t: "Pricing goods below the cost of production.", isCorrect: false, e: "❌ Incorrect. That is Dumping." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "What is 'Market Skimming' in an international context?",
+                opts: [
+                    { t: "Setting a low initial price to rapidly capture market share.", isCorrect: false, e: "❌ Incorrect. That is Penetration Pricing." },
+                    { t: "Setting a high initial price to target early adopters, maximizing revenue before gradually lowering the price.", isCorrect: true, e: "✅ Correct. Tech companies (like Apple) use this to skim the maximum willingness-to-pay from the top of the market." },
+                    { t: "Removing features from a product to lower its cost.", isCorrect: false, e: "❌ Incorrect. That is product stripping/adaptation." },
+                    { t: "Hiding profits from foreign tax authorities.", isCorrect: false, e: "❌ Incorrect. That is tax evasion, sometimes done via transfer pricing." }
+                ]
+            },
+
+            // --- WEEK 9: RESEARCH (Q81 - Q90) ---
+            {
+                c: "Week 9: Research",
+                q: "Why is 'Secondary Data' considered the mandatory first step in international market research?",
+                opts: [
+                    { t: "Because it is always 100% accurate and specific to the firm's exact problem.", isCorrect: false, e: "❌ Incorrect. Secondary data is often broad or outdated." },
+                    { t: "Because it is fast, highly cost-effective, and readily available.", isCorrect: true, e: "✅ Correct. Government reports and trade statistics provide an immediate, cheap overview of the market, preventing obvious mistakes." },
+                    { t: "Because primary data is illegal to collect.", isCorrect: false, e: "❌ Incorrect. Primary data is legal (within privacy laws)." },
+                    { t: "Because consumers prefer answering secondary surveys.", isCorrect: false, e: "❌ Incorrect. Consumers do not interact with secondary data; it is pre-existing." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "What is a major limitation of using 'Primary Data' in foreign markets?",
+                opts: [
+                    { t: "It is incredibly expensive and time-consuming to collect.", isCorrect: true, e: "✅ Correct. Designing, translating, and executing custom surveys or focus groups across borders requires massive budgets." },
+                    { t: "It is usually outdated by the time you find it.", isCorrect: false, e: "❌ Incorrect. Primary data is fresh; secondary data is often outdated." },
+                    { t: "It is freely available to your competitors.", isCorrect: false, e: "❌ Incorrect. Primary data is proprietary; you own it." },
+                    { t: "It cannot be translated.", isCorrect: false, e: "❌ Incorrect. It can be translated, though it requires careful back-translation." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "What is 'Conceptual Equivalence' in cross-cultural surveys?",
+                opts: [
+                    { t: "Ensuring the survey costs the same in every country.", isCorrect: false, e: "❌ Incorrect. Costs will naturally vary by region." },
+                    { t: "Ensuring that the underlying concept being measured has the same meaning across different cultures.", isCorrect: true, e: "✅ Correct. Asking about 'Family' might mean nuclear family in the US, but extended tribe in parts of Africa. If the concept differs, the data is useless." },
+                    { t: "Ensuring the sample sizes are exactly identical.", isCorrect: false, e: "❌ Incorrect. Sample sizes vary based on population." },
+                    { t: "Ensuring the survey is run at the exact same time of day.", isCorrect: false, e: "❌ Incorrect. Time zones make this impossible and irrelevant." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "Why might a firm struggle to collect random sampling data in emerging markets?",
+                opts: [
+                    { t: "Because no one buys products in emerging markets.", isCorrect: false, e: "❌ Incorrect. Emerging markets have massive consumer bases." },
+                    { t: "Due to a lack of infrastructure, such as absent street addresses or low internet penetration.", isCorrect: true, e: "✅ Correct. If you cannot mail a survey or email it, achieving a truly random, representative sample becomes nearly impossible." },
+                    { t: "Because consumers in emerging markets don't speak English.", isCorrect: false, e: "❌ Incorrect. You would translate the survey to the local language." },
+                    { t: "Because secondary data is too detailed.", isCorrect: false, e: "❌ Incorrect. This does not affect primary sampling ability." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "What is 'Social Desirability Bias' in survey research?",
+                opts: [
+                    { t: "When consumers refuse to take surveys out of anger.", isCorrect: false, e: "❌ Incorrect. That is non-response bias." },
+                    { t: "When respondents answer questions in a way they think will be viewed favorably by others.", isCorrect: true, e: "✅ Correct. People often lie on surveys to look richer, healthier, or more polite, skewing the data." },
+                    { t: "When the researcher alters the data to please the CEO.", isCorrect: false, e: "❌ Incorrect. That is researcher fraud." },
+                    { t: "When a brand uses social media influencers.", isCorrect: false, e: "❌ Incorrect. That is a communication strategy." }
+                ]
+            },
+
+            // --- CASE STUDIES & TRENDS (Q91 - Q100) ---
+            {
+                c: "Case: Electrolux",
+                q: "In the Electrolux case study, what specifically allowed the company to achieve 'Glocalization'?",
+                opts: [
+                    { t: "They sold their products exclusively online to avoid retail costs.", isCorrect: false, e: "❌ Incorrect. Electrolux relies heavily on physical retail distribution." },
+                    { t: "They standardized the internal technical components (Modularization) while adapting the exterior design for local tastes.", isCorrect: true, e: "✅ Correct. The motor is identical globally to save money, but the door handles and colors change to match local preferences." },
+                    { t: "They forced consumers worldwide to accept a single, identical refrigerator.", isCorrect: false, e: "❌ Incorrect. That would be pure standardization." },
+                    { t: "They moved all headquarters staff to Asia.", isCorrect: false, e: "❌ Incorrect. Electrolux maintained a global corporate footprint." }
+                ]
+            },
+            {
+                c: "Case: LEGO",
+                q: "Why did LEGO decide to retain its core brick manufacturing in-house rather than fully outsourcing to cheaper factories in Asia?",
+                opts: [
+                    { t: "Because plastic is cheaper to buy in Europe.", isCorrect: false, e: "❌ Incorrect. Raw materials are often cheaper in Asia." },
+                    { t: "To maintain the strict precision, quality control, and brand prestige required for their interlocking bricks.", isCorrect: true, e: "✅ Correct. A brick from 1980 must snap perfectly into a brick made today. Outsourcing risked losing this vital quality control." },
+                    { t: "Because they were banned from operating in Asia.", isCorrect: false, e: "❌ Incorrect. LEGO operates heavily in Asian markets." },
+                    { t: "To qualify for European Union tax breaks.", isCorrect: false, e: "❌ Incorrect. The strategic driver was brand quality, not tax loopholes." }
+                ]
+            },
+            {
+                c: "Case: McCain",
+                q: "McCain's decision to switch to healthier sunflower oil was an adaptation to which changing external force?",
+                opts: [
+                    { t: "Political environment", isCorrect: false, e: "❌ Incorrect. No law forced them to change the oil." },
+                    { t: "Technological environment", isCorrect: false, e: "❌ Incorrect. Cooking oil is not a new technology." },
+                    { t: "Socio-Cultural environment", isCorrect: true, e: "✅ Correct. The public's growing awareness and concern regarding obesity and nutrition forced the brand to adapt its product and messaging." },
+                    { t: "Economic environment", isCorrect: false, e: "❌ Incorrect. The shift was driven by health values, not economic cost." }
+                ]
+            },
+            {
+                c: "Case: Swiss Army",
+                q: "Swiss Army successfully expanded from knives into selling high-end watches and travel gear. This success was heavily reliant on:",
+                opts: [
+                    { t: "Brand Equity and the positive 'Country of Origin' effect.", isCorrect: true, e: "✅ Correct. Consumers trusted the Swiss Army name (equity) and assumed anything 'Swiss Made' would possess exceptional engineering and durability." },
+                    { t: "Aggressive price dumping.", isCorrect: false, e: "❌ Incorrect. Swiss Army positions itself as a premium brand." },
+                    { t: "Establishing Joint Ventures with local competitors.", isCorrect: false, e: "❌ Incorrect. The core driver of consumer adoption was brand trust." },
+                    { t: "Selling products exclusively to the military.", isCorrect: false, e: "❌ Incorrect. They targeted the global commercial consumer market." }
+                ]
+            },
+            {
+                c: "Deloitte Trends",
+                q: "According to the Deloitte Global Marketing Trends report, what does the 'Purpose' trend mandate for organizations?",
+                opts: [
+                    { t: "They must publicly support every political movement.", isCorrect: false, e: "❌ Incorrect. Purpose is about authentic alignment, not blindly following politics." },
+                    { t: "They must know their core 'Why'—the reason they exist beyond making a profit—to guide them through crises.", isCorrect: true, e: "✅ Correct. Purpose-driven organizations have a 'North Star' that helps them make authentic decisions when the market is disrupted." },
+                    { t: "They must standardize all global communication.", isCorrect: false, e: "❌ Incorrect. This relates to communication strategy, not organizational purpose." },
+                    { t: "They must eliminate all human employees in favor of AI.", isCorrect: false, e: "❌ Incorrect. Deloitte actually stresses the 'Human Experience' trend." }
+                ]
+            },
+            {
+                c: "Week 5: Entry Modes",
+                q: "You design a highly successful restaurant concept centered around traditional momo and sukuti. To expand across Europe rapidly without bearing the capital cost of building new restaurants, you allow local investors to use your recipe and brand name for a strict fee. This is:",
+                opts: [
+                    { t: "Indirect Exporting", isCorrect: false, e: "❌ Incorrect. You are not shipping physical food from a home country; you are sharing a business model." },
+                    { t: "Franchising", isCorrect: true, e: "✅ Correct. Franchising allows rapid global expansion using other people's money, while you maintain strict control over the core product and brand standards." },
+                    { t: "Wholly Owned Subsidiary", isCorrect: false, e: "❌ Incorrect. That would require you to spend your own money to build the European restaurants." },
+                    { t: "Strategic Alliance", isCorrect: false, e: "❌ Incorrect. An alliance does not involve the strict operational control and fee structure of a franchise." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "While managing logistics as a warehouse operative in Gloucestershire, you notice that physical goods imported from Asia are hit with massive tariffs and shipping markups by the time they reach your dock. In international pricing, this massive jump in cost is called:",
+                opts: [
+                    { t: "Transfer Pricing", isCorrect: false, e: "❌ Incorrect. Transfer pricing is an internal corporate accounting measure." },
+                    { t: "Price Escalation", isCorrect: true, e: "✅ Correct. Price Escalation is the compounding of costs (shipping, insurance, tariffs, middleman margins) that makes exported goods much more expensive than domestic goods." },
+                    { t: "Market Skimming", isCorrect: false, e: "❌ Incorrect. Skimming is a deliberate high-price strategy for new tech." },
+                    { t: "Dumping", isCorrect: false, e: "❌ Incorrect. Dumping is selling goods artificially low, not high." }
+                ]
+            },
+            {
+                c: "Week 2: Environment",
+                q: "You manage several web domains hosted on foreign servers. To avoid sudden price hikes when the British Pound drops in value, you settle your invoices using stable cryptocurrency (USDT). What international marketing risk are you hedging against?",
+                opts: [
+                    { t: "Political Risk", isCorrect: false, e: "❌ Incorrect. While politics can influence currencies, the direct risk here is monetary." },
+                    { t: "Technological Risk", isCorrect: false, e: "❌ Incorrect. Even though crypto is tech, the risk being hedged is financial." },
+                    { t: "Economic (Currency/Exchange) Risk", isCorrect: true, e: "✅ Correct. Fluctuating exchange rates can destroy profit margins overnight. Using a pegged digital currency stabilizes the transaction, mitigating Economic risk." },
+                    { t: "Socio-Cultural Risk", isCorrect: false, e: "❌ Incorrect. Exchange rates are not cultural." }
+                ]
+            },
+            {
+                c: "Week 5: Entry Modes",
+                q: "A tech company creates an innovative AI platform for cinematic music composers. Because software requires no physical shipping, they launch in 40 countries on their very first day of business. They are an example of a:",
+                opts: [
+                    { t: "Joint Venture", isCorrect: false, e: "❌ Incorrect. They did not partner with 40 different local companies." },
+                    { t: "Born Global Firm", isCorrect: true, e: "✅ Correct. Born Global firms (typically tech or digital companies) skip the traditional slow domestic growth phase and target the global market from inception." },
+                    { t: "Grey Market Operator", isCorrect: false, e: "❌ Incorrect. They are selling legitimate, authorized software." },
+                    { t: "Traditional Multinational", isCorrect: false, e: "❌ Incorrect. Traditional MNEs grow domestically first over many years." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "A firm evaluating a new market ignores secondary data and immediately pays £50,000 for a custom consumer survey. Why is this a strategic error?",
+                opts: [
+                    { t: "Because surveys are illegal in most countries.", isCorrect: false, e: "❌ Incorrect. Surveys are a standard business practice." },
+                    { t: "Because primary data should only be collected after exhausting fast, cheap secondary data.", isCorrect: true, e: "✅ Correct. Secondary data might have already answered their question for free, saving the firm £50,000." },
+                    { t: "Because consumers always lie on custom surveys.", isCorrect: false, e: "❌ Incorrect. While bias exists, primary data is still highly valuable when used correctly." },
+                    { t: "Because the MACS Matrix forbids primary research.", isCorrect: false, e: "❌ Incorrect. The MACS Matrix relies on research data." }
+                ]
+            },
+
+            // --- DEEP DIVE: PESTEL & PORTER (Q116 - Q125) ---
+            {
+                c: "Week 2: Environment",
+                q: "In Porter's Five Forces, how does strong 'Supplier Power' affect an industry?",
+                opts: [
+                    { t: "It makes the industry highly profitable for the manufacturers.", isCorrect: false, e: "❌ Incorrect. Powerful suppliers squeeze the manufacturer's profits." },
+                    { t: "It allows suppliers to raise raw material prices, reducing the profitability of the firms buying from them.", isCorrect: true, e: "✅ Correct. If there is only one company making a vital microchip, they can charge whatever they want, hurting your margins." },
+                    { t: "It prevents government intervention.", isCorrect: false, e: "❌ Incorrect. Supplier power is a micro-environmental competitive factor, not a political shield." },
+                    { t: "It lowers the barriers to entry.", isCorrect: false, e: "❌ Incorrect. High supplier power often makes it harder for new firms to enter and survive." }
+                ]
+            },
+            {
+                c: "Week 2: Environment",
+                q: "Under the PESTEL framework, a country passing a strict new data privacy law (like GDPR) represents a shift in which environment?",
+                opts: [
+                    { t: "Technological", isCorrect: false, e: "❌ Incorrect. While it involves tech, the barrier is the legislation itself." },
+                    { t: "Economic", isCorrect: false, e: "❌ Incorrect. It is not a monetary or inflation-based metric." },
+                    { t: "Political / Legal", isCorrect: true, e: "✅ Correct. Government legislation directly regulates how businesses can legally operate." },
+                    { t: "Social", isCorrect: false, e: "❌ Incorrect. While driven by social desire for privacy, the enforcement is legal." }
+                ]
+            },
+            {
+                c: "Week 2: Environment",
+                q: "According to Porter’s Diamond, why is 'Intense Domestic Rivalry' actually beneficial for a country's global competitiveness?",
+                opts: [
+                    { t: "It allows the government to collect more taxes.", isCorrect: false, e: "❌ Incorrect. Taxes do not drive global competitive advantage." },
+                    { t: "It forces local companies to aggressively innovate and cut costs to survive, making them formidable when they expand abroad.", isCorrect: true, e: "✅ Correct. A lazy monopoly at home will get crushed globally. Fierce local fighting creates strong, battle-tested companies." },
+                    { t: "It encourages companies to form illegal monopolies.", isCorrect: false, e: "❌ Incorrect. Porter advocates for competition, not illegal collusion." },
+                    { t: "It lowers the need for marketing.", isCorrect: false, e: "❌ Incorrect. Fierce rivalry usually increases the need for marketing." }
+                ]
+            },
+
+            // --- DEEP DIVE: CULTURE & PRODUCT (Q126 - Q135) ---
+            {
+                c: "Week 4: Culture",
+                q: "In a 'Low-Context' culture, how should a marketer design their advertising?",
+                opts: [
+                    { t: "Rely heavily on subtle metaphors, body language, and implicit social status.", isCorrect: false, e: "❌ Incorrect. That is the strategy for a High-Context culture (like Japan)." },
+                    { t: "Use clear, direct, and explicit messaging outlining the product's factual benefits.", isCorrect: true, e: "✅ Correct. Low-Context cultures (like the USA or Germany) value directness. 'Tell me exactly what it does and how much it costs.'" },
+                    { t: "Use humor that insults the competitor.", isCorrect: false, e: "❌ Incorrect. Comparative advertising is separate from context levels." },
+                    { t: "Avoid using any text on the screen.", isCorrect: false, e: "❌ Incorrect. Low-context cultures often prefer clear text to explain features." }
+                ]
+            },
+            {
+                c: "Week 3: Product",
+                q: "A car manufacturer must alter its exhaust systems to meet new European emission standards before it can sell vehicles there. This is an example of:",
+                opts: [
+                    { t: "Optional Adaptation", isCorrect: false, e: "❌ Incorrect. They are not doing this to meet consumer taste; they are doing it to avoid being banned." },
+                    { t: "Mandatory Adaptation", isCorrect: true, e: "✅ Correct. When physical product changes are legally required by local regulations, it is mandatory." },
+                    { t: "Product Standardization", isCorrect: false, e: "❌ Incorrect. They are actively changing the product, not standardizing it." },
+                    { t: "Glocalization of Communication", isCorrect: false, e: "❌ Incorrect. This is a physical product change, not an advertising change." }
+                ]
+            },
+            {
+                c: "Week 4: Culture",
+                q: "An advertisement showing a teenager rebelling against their parents to follow their own dreams would likely FAIL in a society that scores highly in:",
+                opts: [
+                    { t: "Masculinity", isCorrect: false, e: "❌ Incorrect. Masculine cultures often celebrate individual heroic achievements." },
+                    { t: "Individualism", isCorrect: false, e: "❌ Incorrect. Individualistic cultures celebrate doing your own thing." },
+                    { t: "Collectivism", isCorrect: true, e: "✅ Correct. Collectivist cultures value group harmony, family consensus, and respect for elders above individual rebellion." },
+                    { t: "Low Power Distance", isCorrect: false, e: "❌ Incorrect. Low power distance cultures accept questioning authority." }
+                ]
+            },
+
+            // --- DEEP DIVE: ENTRY MODES & PRICING (Q136 - Q145) ---
+            {
+                c: "Week 8: Pricing",
+                q: "What is the strategic middle-ground between Ethnocentric pricing (one global price) and Polycentric pricing (total local control)?",
+                opts: [
+                    { t: "Transfer Pricing", isCorrect: false, e: "❌ Incorrect. Transfer pricing is for internal corporate transactions." },
+                    { t: "Market Skimming", isCorrect: false, e: "❌ Incorrect. Skimming is a high-to-low timeline strategy." },
+                    { t: "Geocentric Pricing", isCorrect: true, e: "✅ Correct. Geocentric pricing establishes a global baseline to protect the brand, but allows coordinated adjustments for local realities." },
+                    { t: "Dumping", isCorrect: false, e: "❌ Incorrect. Dumping is an illegal predatory pricing strategy." }
+                ]
+            },
+            {
+                c: "Week 5: Entry Modes",
+                q: "Two competing pharmaceutical giants decide to temporarily collaborate on a specific R&D project to cure a disease, without forming a new, separate company. This is a:",
+                opts: [
+                    { t: "Wholly Owned Subsidiary", isCorrect: false, e: "❌ Incorrect. That would mean one company owns the operation 100%." },
+                    { t: "Joint Venture", isCorrect: false, e: "❌ Incorrect. A Joint Venture legally requires the creation of a brand new third company." },
+                    { t: "Strategic Alliance", isCorrect: true, e: "✅ Correct. A Strategic Alliance is a contractual handshake to work together while remaining totally legally independent." },
+                    { t: "Franchise", isCorrect: false, e: "❌ Incorrect. Franchising involves licensing a business model." }
+                ]
+            },
+            {
+                c: "Week 8: Pricing",
+                q: "Why is 'Dumping' heavily penalized by the World Trade Organization (WTO)?",
+                opts: [
+                    { t: "Because it creates Grey Markets.", isCorrect: false, e: "❌ Incorrect. Grey markets are created by varying retail prices, not dumping." },
+                    { t: "Because it involves selling goods below the cost of production in a foreign market to deliberately destroy local competitors.", isCorrect: true, e: "✅ Correct. It is a predatory monopoly tactic. Once the local firms go bankrupt, the dumping firm raises its prices." },
+                    { t: "Because it violates environmental laws.", isCorrect: false, e: "❌ Incorrect. Dumping in marketing refers to prices, not physical waste." },
+                    { t: "Because it increases Price Escalation.", isCorrect: false, e: "❌ Incorrect. Dumping artificially lowers prices." }
+                ]
+            },
+
+            // --- FINAL RAPID FIRE & CASE RECAPS (Q146 - Q150) ---
+            {
+                c: "Case: Bosch",
+                q: "When Bosch evaluated Middle Eastern markets, they scored the 'Market Attractiveness' against their 'Competitive Strength'. Which tool were they using?",
+                opts: [
+                    { t: "PESTEL", isCorrect: false, e: "❌ Incorrect. PESTEL only looks at external macro factors." },
+                    { t: "Porter's 5 Forces", isCorrect: false, e: "❌ Incorrect. 5 Forces looks at industry rivalry." },
+                    { t: "The MACS Matrix", isCorrect: true, e: "✅ Correct. The MACS Matrix specifically plots those two exact variables to filter expansion targets." },
+                    { t: "The Value Chain", isCorrect: false, e: "❌ Incorrect. The Value Chain looks at internal operational steps." }
+                ]
+            },
+            {
+                c: "Week 7: Comms",
+                q: "True or False: The 'Country of Origin' effect can only ever be positive (e.g., French Wine, German Cars). It never hurts a brand's image.",
+                opts: [
+                    { t: "True", isCorrect: false, e: "❌ Incorrect. Negative bias is very real." },
+                    { t: "False", isCorrect: true, e: "✅ Correct. The COO effect can be highly negative if a country has a global reputation for poor quality, corruption, or unsafe manufacturing standards." },
+                    { t: "Only true for services.", isCorrect: false, e: "❌ Incorrect. It affects both products and services." },
+                    { t: "Only true in B2B markets.", isCorrect: false, e: "❌ Incorrect. It heavily affects B2C consumer choices." }
+                ]
+            },
+            {
+                c: "Deloitte Trends",
+                q: "The Deloitte trend involving breaking down industry walls to create new ecosystems through cross-industry partnerships is called:",
+                opts: [
+                    { t: "Agility", isCorrect: false, e: "❌ Incorrect. Agility is about speed and flexibility." },
+                    { t: "Participation", isCorrect: false, e: "❌ Incorrect. Participation is about letting customers co-create." },
+                    { t: "Fusion", isCorrect: true, e: "✅ Correct. Fusion is about creating entirely new value by combining different industries (e.g., a bank partnering with a health-tracking app)." },
+                    { t: "Trust", isCorrect: false, e: "❌ Incorrect. Trust is about empathy and competence." }
+                ]
+            },
+            {
+                c: "Week 9: Research",
+                q: "In international market segmentation, what does 'Targeting' refer to?",
+                opts: [
+                    { t: "Dividing the market into distinct groups.", isCorrect: false, e: "❌ Incorrect. That is the definition of 'Segmentation'." },
+                    { t: "Creating an image in the consumer's mind.", isCorrect: false, e: "❌ Incorrect. That is the definition of 'Positioning'." },
+                    { t: "Selecting one or more of the identified segments to enter and focus resources on.", isCorrect: true, e: "✅ Correct. You Segment (divide), Target (choose the best one), and Position (create the image)." },
+                    { t: "Choosing a physical retail location.", isCorrect: false, e: "❌ Incorrect. That is 'Place' in the 4Ps." }
+                ]
+            },
+            {
+                c: "Course Synthesis",
+                q: "What is the ultimate key to mastering International Strategic Marketing?",
+                opts: [
+                    { t: "Memorizing terminology without context.", isCorrect: false, e: "❌ Incorrect. Theory without application fails in the real world." },
+                    { t: "Assuming global standardization always wins.", isCorrect: false, e: "❌ Incorrect. Total standardization often alienates local cultures." },
+                    { t: "Critically applying frameworks (PESTEL, Hofstede, MACS) to balance global efficiencies with local cultural realities.", isCorrect: true, e: "✅ Correct. Distinction-level mastery requires navigating the tension between global scale and local relevance using structured analysis." },
+                    { t: "Relying entirely on the Self-Reference Criterion.", isCorrect: false, e: "❌ Incorrect. The SRC is the ultimate trap that destroys global campaigns." }
+                ]
+            }
+        ];
+
+        // --- ENGINE LOGIC ---
+        function init() {
+            renderCards(detailedDB);
+        }
+
+        function renderCards(data) {
+            const container = document.getElementById('qaList');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 50px; font-size: 20px; color: var(--text-muted);">No questions found.</div>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'qa-card';
+                
+                let html = `
+                    <div class="qa-header">
+                        <span class="qa-cat">${item.c}</span>
+                        <span class="qa-num">Q ${index + 1}</span>
+                    </div>
+                    <div class="qa-q">${item.q}</div>
+                    <button class="btn-reveal" onclick="this.parentElement.classList.add('revealed')">👁️ Reveal Explanations</button>
+                    <div class="reveal-hint">Click card to reveal answers</div>
+                    <div class="qa-options-container">
+                `;
+
+                const letters = ['A', 'B', 'C', 'D'];
+                item.opts.forEach((opt, optIndex) => {
+                    const statusClass = opt.isCorrect ? 'is-correct' : 'is-wrong';
+                    html += `
+                        <div class="opt-box ${statusClass}">
+                            <div class="opt-header">
+                                <div class="opt-letter">${letters[optIndex]}</div>
+                                <div class="opt-text">${opt.t}</div>
+                            </div>
+                            <div class="opt-explanation">${opt.e}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`; 
+                card.innerHTML = html;
+
+                card.onclick = function(e) {
+                    if (document.body.classList.contains('study-mode') && !e.target.classList.contains('btn-reveal')) {
+                        this.classList.add('revealed');
+                    }
+                };
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('pageTitle').innerText = `${data.length} Questions Displayed`;
+        }
+
+        function filterCat(category, el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('searchInput').value = '';
+
+            if (category === 'All') renderCards(detailedDB);
+            else renderCards(detailedDB.filter(q => q.c.includes(category)));
+
+            if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('mainWrapper').scrollTo(0,0);
+        }
+
+        function searchQs() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const filtered = detailedDB.filter(q => {
+                if (q.q.toLowerCase().includes(term)) return true;
+                for (let opt of q.opts) {
+                    if (opt.t.toLowerCase().includes(term) || opt.e.toLowerCase().includes(term)) return true;
+                }
+                return false;
+            });
+            renderCards(filtered);
+        }
+
+        function revealAll() {
+            document.body.classList.remove('study-mode');
+            const btn = document.getElementById('studyBtn');
+            if(btn) { btn.innerText = "🧠 Study Mode: OFF"; btn.classList.remove('btn-active'); }
+            document.querySelectorAll('.qa-card').forEach(c => c.classList.add('revealed'));
+        }
+
+        function toggleStudyMode() {
+            const body = document.body;
+            const btn = document.getElementById('studyBtn');
+            if (body.classList.contains('study-mode')) {
+                body.classList.remove('study-mode');
+                btn.innerText = "🧠 Study Mode: OFF"; btn.classList.remove('btn-active');
+            } else {
+                body.classList.add('study-mode');
+                btn.innerText = "🧠 Study Mode: ON"; btn.classList.add('btn-active');
+                document.querySelectorAll('.qa-card').forEach(c => c.classList.remove('revealed'));
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light'); btn.innerText = '🌙 Light';
+            } else {
+                html.setAttribute('data-theme', 'dark'); btn.innerText = '☀️ Dark';
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

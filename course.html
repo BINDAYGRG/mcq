@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM7403 | Deep Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- THEMES & VARIABLES --- */
+        :root[data-theme="light"] {
+            --bg-main: #f0f4f8; 
+            --bg-glass: rgba(255, 255, 255, 0.85); 
+            --bg-card: #ffffff;
+            --primary: #4f46e5; 
+            --primary-hover: #4338ca; 
+            --secondary: #0f172a;
+            --text-main: #1e293b; 
+            --text-muted: #475569; 
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
+            --success: #10b981; 
+            --scenario: #3b82f6;
+        }
+        :root[data-theme="dark"] {
+            --bg-main: #0b0f19; 
+            --bg-glass: rgba(15, 23, 42, 0.85); 
+            --bg-card: #1e293b;
+            --primary: #6366f1; 
+            --primary-hover: #818cf8; 
+            --secondary: #f8fafc;
+            --text-main: #f1f5f9; 
+            --text-muted: #cbd5e1; 
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
+            --success: #34d399; 
+            --scenario: #60a5fa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+
+        body { 
+            display: flex; height: 100vh; color: var(--text-main); overflow: hidden; background: var(--bg-main);
+            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 50%);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 320px; background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 20px; z-index: 100;
+        }
+
+        .brand { text-align: center; margin-bottom: 30px; }
+        .brand h1 { font-size: 32px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;}
+        .brand span { font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+
+        .nav-menu { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .nav-menu::-webkit-scrollbar { width: 5px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+
+        .nav-item {
+            padding: 16px 20px; border-radius: 12px; color: var(--text-muted); font-weight: 600; font-size: 16px;
+            cursor: pointer; transition: 0.3s; margin-bottom: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid transparent;
+        }
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); transform: translateX(5px); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 20px -10px var(--primary); font-weight: 700; }
+
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .header-bar h2 { font-size: 32px; font-weight: 800; color: var(--secondary); }
+        
+        .btn-theme { background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); padding: 12px 24px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
+        .btn-theme:hover { transform: translateY(-2px); border-color: var(--primary); color: var(--primary); }
+
+        .section { display: none; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-width: 1000px; margin: 0 auto; }
+        .section.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CONTENT STYLING --- */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        
+        .card h3 { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 25px; line-height: 1.3; border-bottom: 2px solid rgba(99, 102, 241, 0.2); padding-bottom: 15px;}
+        
+        .academic-theory { font-size: 17px; line-height: 1.8; color: var(--text-main); margin-bottom: 25px; }
+        .academic-theory strong { color: var(--secondary); font-weight: 800; }
+        .academic-theory ul { margin-left: 20px; margin-top: 10px; margin-bottom: 15px; }
+        .academic-theory li { margin-bottom: 10px; padding-left: 10px; }
+        
+        /* Layman's Box */
+        .layman-box { background: rgba(16, 185, 129, 0.08); border-left: 5px solid var(--success); padding: 25px; border-radius: 0 15px 15px 0; margin: 30px 0; }
+        .layman-box h4 { color: var(--success); font-size: 18px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .layman-box p { font-size: 16px; line-height: 1.7; color: var(--text-main); margin: 0; }
+
+        /* Real-Life Scenario Box */
+        .scenario-box { background: rgba(59, 130, 246, 0.08); border-left: 5px solid var(--scenario); padding: 25px; border-radius: 0 15px 15px 0; margin: 30px 0; }
+        .scenario-box h4 { color: var(--scenario); font-size: 18px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .scenario-box p { font-size: 16px; line-height: 1.7; color: var(--text-main); margin: 0; }
+
+        /* Mobile Menu */
+        .mobile-toggle { display: none; background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Image Tag Styling (Just formatting it nicely) */
+        .img-placeholder { display: inline-block; background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 15px 20px; border-radius: 10px; border: 1px dashed var(--primary); font-weight: 600; font-size: 15px; margin: 15px 0; width: 100%; text-align: center; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; transition: left 0.4s ease; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .main-wrapper { padding: 20px; }
+            .header-bar h2 { font-size: 24px; }
+            .card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <h1>BM7403</h1>
+            <span>Deep Study Hub</span>
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="nav('week1')">Week 1: Intro & Glocalization</div>
+            <div class="nav-item" onclick="nav('week2')">Week 2: Market Environment</div>
+            <div class="nav-item" onclick="nav('week3')">Week 3: Product Decisions</div>
+            <div class="nav-item" onclick="nav('week4')">Week 4: Socio-Cultural</div>
+            <div class="nav-item" onclick="nav('week56')">Weeks 5 & 6: Entry Modes</div>
+            <div class="nav-item" onclick="nav('week7')">Week 7: Communication</div>
+            <div class="nav-item" onclick="nav('week8')">Week 8: Pricing Strategies</div>
+            <div class="nav-item" onclick="nav('week9')">Week 9: Global Research</div>
+        </div>
+    </div>
+
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="header-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="mobile-toggle" onclick="toggleMenu()">☰ Menu</button>
+                <h2 id="pageTitle">Week 1: Introduction to International Strategic Marketing</h2>
+            </div>
+                        <button class="btn-theme" onclick="window.location.href='index.html'" style="margin-right: 10px;">🏠 Dashboard</button>
+
+            <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">☀️ Light Mode</button>
+        </div>
+
+        <div id="week1" class="section active">
+            <div class="card">
+                <h3>Week 1: Introduction to International Strategic Marketing</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: The Multidimensional Challenge</strong><br><br>
+                    International marketing (defined by Hollensen) is the execution of one or more marketing mix decisions across national boundaries. Unlike domestic marketing, it introduces extreme complexity due to multidimensional risk (currency exchange, foreign legal systems, and cultural friction).<br><br>
+                    The core strategic debate is <strong>Standardization vs. Adaptation</strong>.</p>
+                    <ul>
+                        <li><strong>Standardization</strong> is driven by the desire for economies of scale in R&D, production, and marketing. It creates a unified global brand identity but risks alienating local consumers.</li>
+                        <li><strong>Adaptation</strong> is driven by differences in consumer behavior, purchasing power, and strict local regulations.</li>
+                    </ul>
+                    <p>The modern solution is <strong>Glocalization</strong> ("Think Global, Act Local"), which seeks to balance the cost-saving benefits of global integration with the consumer appeal of local responsiveness. A firm's approach is often dictated by the <strong>EPRG Framework</strong>:</p>
+                    <ul>
+                        <li><em>Ethnocentric:</em> Home-country standard is applied everywhere.</li>
+                        <li><em>Polycentric:</em> Every host country gets a highly adapted strategy.</li>
+                        <li><em>Geocentric:</em> A world-oriented view targeting global segments with standardized core products but localized marketing.</li>
+                    </ul>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Selling in your home country is playing checkers; selling globally is playing 3D chess. The biggest headache is deciding whether to sell the exact same product everywhere (Standardization) to save a ton of money, or to tweak the product for every single country (Adaptation) so locals actually buy it. Glocalization is the ultimate compromise: build the expensive, hidden parts of the product the same way everywhere, but change the outside features and the advertisements so they fit the local vibe perfectly.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>Consider a global fast-food giant. To achieve economies of scale, they standardize their kitchen equipment, point-of-sale software, and supply chain logistics globally. However, to survive in a market like India, they completely adapt the menu (Actual Product) to exclude beef and include local spices, while their advertising (Communication) focuses heavily on multi-generational family dining rather than quick solo meals.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week2" class="section">
+            <div class="card">
+                <h3>Week 2: International Market Environment</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Environmental Scanning Frameworks</strong><br><br>
+                    Before committing resources to a foreign market, firms must conduct multi-layered environmental scanning.</p>
+                    <ul>
+                        <li><strong>Macro-Environment (PESTEL):</strong> Evaluates uncontrollable external forces.
+                            <ul>
+                                <li><em>Political:</em> Government stability, trade embargoes, expropriation risk.</li>
+                                <li><em>Economic:</em> GDP growth, inflation, currency exchange rates, purchasing power parity.</li>
+                                <li><em>Social:</em> Demographic shifts, urbanization, religious beliefs.</li>
+                                <li><em>Technological:</em> IP protection, infrastructure, digital penetration.</li>
+                                <li><em>Environmental:</em> Climate legislation, carbon taxes.</li>
+                                <li><em>Legal:</em> Antitrust laws, employment regulations, health and safety standards.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <div class="img-placeholder">
+
+[Image of PESTEL analysis framework]
+</div>
+
+                    <ul>
+                        <li><strong>Meso-Environment (Porter’s Five Forces):</strong> Assesses the attractiveness and profit potential of a specific industry. If barriers to entry are low, buyer/supplier power is high, and substitutes are plentiful, industry rivalry will be fierce and profits will be low.</li>
+                    </ul>
+                    
+                    <div class="img-placeholder">
+
+[Image of Porter's Five Forces model]
+</div>
+
+                    <ul>
+                        <li><strong>National Advantage (Porter’s Diamond):</strong> Explains why certain nations achieve global dominance in specific industries. It relies on four interacting pillars: Factor Conditions (skilled labor), Demand Conditions (sophisticated domestic buyers forcing innovation), Related and Supporting Industries (strong supply chains), and Firm Strategy/Rivalry (intense domestic competition).</li>
+                    </ul>
+
+                    <div class="img-placeholder">
+
+[Image of Porter's Diamond model]
+</div>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Before you spend millions entering a new country, you have to scan the battlefield at three different zoom levels. PESTEL is the satellite view—checking if the country's economy is stable and if their laws will crush you. Porter's Five Forces is the drone view—looking specifically at your direct rivals to see if the market is already too crowded to make a profit. Porter's Diamond is looking at the soil—asking why countries like Germany are naturally incredible at making cars (hint: demanding local drivers and amazing local steel suppliers).</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>An electric vehicle (EV) manufacturer is evaluating entry into the Chinese market. A PESTEL analysis reveals high <strong>Political</strong> attractiveness due to heavy government subsidies for green energy. However, Porter's Five Forces reveals extreme <strong>Competitive Rivalry</strong> and high <strong>Threat of New Entrants</strong> due to dozens of heavily funded local EV startups, severely squeezing potential profit margins.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week3" class="section">
+            <div class="card">
+                <h3>Week 3: International Product Decisions</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Product Levels and Constraints</strong><br><br>
+                    International product policy requires dissecting the offering into three tiers:</p>
+                    <ol>
+                        <li><strong>Core Product:</strong> The fundamental, intangible problem-solving benefit.</li>
+                        <li><strong>Actual Product:</strong> The physical attributes, packaging, quality level, and brand name.</li>
+                        <li><strong>Augmented Product:</strong> After-sales service, warranties, installation, and delivery networks.</li>
+                    </ol>
+
+                    <div class="img-placeholder">
+
+[Image of Three levels of a product]
+</div>
+
+                    <p>When taking a product abroad, adaptations fall into two categories:</p>
+                    <ul>
+                        <li><strong>Mandatory Adaptation:</strong> Changes dictated by absolute legal, safety, or geographical requirements (e.g., altering a car to left-hand drive, or changing electrical voltage from 110v to 220v).</li>
+                        <li><strong>Discretionary (Optional) Adaptation:</strong> Changes made to better align with local tastes, preferences, or income levels to increase market share.</li>
+                    </ul>
+                    <p>Furthermore, marketers must leverage or mitigate the <strong>Country of Origin (COO) Effect</strong>—the cognitive bias where consumers utilize the country of manufacture as an absolute heuristic for product quality and reliability.</p>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>A product is like an onion. The center (Core) is the reason people buy it—like buying a coat to stay warm. The next layer (Actual) is the physical coat, the zippers, and the brand logo. The outer layer (Augmented) is the return policy and the customer service line. When you sell abroad, some changes are mandatory (if the coat uses a chemical banned in Europe, you *must* change it). Other changes are optional (changing the color because Europeans prefer darker winter coats). The COO effect means people will pay 30% more for that coat simply because the tag says "Made in Italy."</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>A commercial appliance manufacturer sells industrial refrigerators. The Core Product (keeping food cold) remains universally standard. However, Mandatory Adaptation is required for the Actual Product to meet the strict European Union energy efficiency regulations and plug configurations. For the Augmented Product, the company must establish an entirely new network of local repair technicians in Germany to honor the 24/7 service warranty promised in their marketing.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week4" class="section">
+            <div class="card">
+                <h3>Week 4: Socio-Cultural Considerations</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: The Invisible Matrix of Consumer Behavior</strong><br><br>
+                    Culture is the collective programming of the mind. It is learned, interrelated, and dictates the boundaries of acceptable consumer behavior. <br><br>
+                    <strong>Hofstede’s Cultural Dimensions</strong> remain the premier framework for cross-cultural analysis:</p>
+                    <ul>
+                        <li><strong>Power Distance (PDI):</strong> The degree to which unequal distribution of power is expected and accepted.</li>
+                        <li><strong>Individualism vs. Collectivism (IDV):</strong> The preference for a loosely-knit social framework (self-reliance) versus a tightly-knit framework (loyalty to the in-group).</li>
+                        <li><strong>Masculinity vs. Femininity (MAS):</strong> Preference for achievement, heroism, and material reward versus cooperation, modesty, and quality of life.</li>
+                        <li><strong>Uncertainty Avoidance (UAI):</strong> The degree to which society feels uncomfortable with uncertainty and ambiguity, leading to strict codes of belief and behavior.</li>
+                    </ul>
+
+                    <div class="img-placeholder">
+
+[Image of Hofstede cultural dimensions]
+</div>
+
+                    <p>Marketers must also navigate Edward T. Hall’s concept of <strong>High-Context vs. Low-Context</strong> cultures. In high-context cultures (e.g., Japan, Middle East), much of the message is conveyed through non-verbal cues and social standing. In low-context cultures (e.g., USA, Germany), communication is direct, explicit, and literal. <br><br>
+                    The ultimate threat to navigating this is the <strong>Self-Reference Criterion (SRC)</strong>—the unconscious tendency to evaluate a foreign market through the lens of one's own cultural norms.</p>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Culture is the invisible operating system running in everyone's brain. Hofstede's dimensions act as a diagnostic tool. If you are selling to a culture with "High Uncertainty Avoidance," they hate taking risks—so you better offer a rock-solid, money-back guarantee. If you are selling in a "Low-Context" culture, your advertising needs to get straight to the point and list the facts; don't rely on subtle, artistic metaphors. The SRC is what happens when a marketer ignores all this, assumes everyone in the world thinks exactly like they do, and ends up running a highly offensive or confusing ad campaign.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>An American software company launches an aggressive, comparative advertising campaign in Japan, directly calling out a competitor's flaws and highlighting individual employee achievements. It fails catastrophically. The marketer fell victim to the SRC, applying American values (High Individualism, Low-Context directness) to Japan, which is a Highly Collectivist, High-Context culture that values group harmony, subtlety, and views direct, aggressive confrontation as deeply unprofessional.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week56" class="section">
+            <div class="card">
+                <h3>Weeks 5 & 6: Market Selection & Entry Modes</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Screening and The Risk/Control Continuum</strong><br><br>
+                    Firms cannot enter every market simultaneously. They must filter opportunities.</p>
+                    <ul>
+                        <li><strong>The MACS Matrix (Market Attractiveness / Competitive Strength):</strong> A quantitative tool used heavily by Large Scale Enterprises (LSEs). It scores a target market’s external appeal (market size, growth rate, economic stability) against the firm’s internal ability to win in that market (brand awareness, local network, capital).</li>
+                        <li><strong>Psychic Distance vs. Geographic Distance:</strong> SMEs often lack resources for MACS screening and instead use an "Opportunistic Approach," expanding into markets with low <em>Psychic Distance</em> (perceived similarities in culture, language, and business practices), even if the <em>Geographic Distance</em> is high.</li>
+                    </ul>
+
+                    <p>Once a market is selected, the firm must choose an <strong>Entry Mode</strong>. This exists on a continuum balancing Risk, Commitment, and Control.</p>
+                    <ol>
+                        <li><strong>Exporting (Indirect/Direct):</strong> Manufacturing at home and shipping abroad. <em>Low risk, low capital, but minimal control over how the product is sold.</em></li>
+                        <li><strong>Licensing & Franchising:</strong> Granting a foreign entity the right to use Intellectual Property (patents, trademarks, business models) for a royalty fee. <em>Moderate risk and return.</em></li>
+                        <li><strong>Joint Ventures (JV) & Strategic Alliances:</strong> Partnering with a local firm. A JV creates a completely new, shared corporate entity. <em>Shared risk, but high potential for management conflict.</em></li>
+                        <li><strong>Foreign Direct Investment (FDI) / Wholly Owned Subsidiary:</strong> Buying or building facilities in the host country from scratch. <em>Maximum control and profit potential, but carries 100% of the financial and political risk.</em></li>
+                    </ol>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>You can't conquer the world in one day. Big companies use a giant spreadsheet (MACS) to calculate where they will make the most money. Small companies just look for countries that speak the same language so it feels less scary (Psychic Distance). <br><br>
+                    When you actually move in, you have to pick your weapon. Exporting is just mailing your product and hoping it sells. Licensing is renting out your brand name. A Joint Venture is marrying a local company (and hoping you don't end up in a messy divorce). A Wholly Owned Subsidiary means you buy the land, build the factory, and keep all the money for yourself.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>A UK clothing brand wants to enter India. Using <strong>Transaction Cost Analysis (TCA)</strong>, they realize that finding and monitoring local sales agents (Exporting) is too difficult, and the risk of a partner stealing their designs (Licensing) is too high. Because these external transaction frictions are immense, they choose <strong>FDI</strong>, building their own stores to maintain absolute control over their brand image, despite the massive upfront cost.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week7" class="section">
+            <div class="card">
+                <h3>Week 7: International Communication Strategies</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Encoding, Decoding, and Noise</strong><br><br>
+                    International marketing communication must navigate complex cultural barriers. The foundational communication model dictates that a <strong>Sender</strong> must <strong>Encode</strong> a message into symbols/words, send it through a <strong>Media Channel</strong>, and the <strong>Receiver</strong> must <strong>Decode</strong> it.</p>
+                    
+                    <ul>
+                        <li><strong>Noise:</strong> Any interference that distorts the message. In international marketing, this isn't just literal noise; it is poor translations, cultural taboos, competitive clutter, or misunderstood humor.</li>
+                        <li><strong>Standardized vs. Adapted Communication:</strong> A firm may sell a standardized physical product globally but heavily adapt the communication to fit local cultures (e.g., using different actors, humor, or emotional appeals).</li>
+                        <li><strong>Push vs. Pull Strategies:</strong>
+                            <ul>
+                                <li><em>Push:</em> Focusing marketing efforts heavily on channel intermediaries (wholesalers/retailers) using trade discounts and personal selling to "push" the product onto shelves.</li>
+                                <li><em>Pull:</em> Focusing heavily on mass media advertising directed at the end-consumer to create demand that "pulls" the product through the supply chain.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Advertising globally is like playing a game of telephone across different languages. You (the Sender) create an ad. If you don't understand the local culture, the customer (the Receiver) will decode it completely wrong. "Noise" is that awkward moment when your innocent slogan accidentally translates to something highly offensive. To fix this, smart companies sell the exact same product everywhere but completely change the TV commercials to match the local sense of humor.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>A global cheese brand (like <em>The Laughing Cow</em>) sells the exact same cheese wedges in the UK, France, and Egypt. The Actual Product is highly standardized. However, their <strong>Pull Strategy</strong> involves entirely adapted television commercials. In the UK, the ad relies on dry, sarcastic humor; in France, it focuses on culinary tradition; in Egypt, it focuses heavily on large family gatherings. They adapt the message to cut through cultural "Noise."</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week8" class="section">
+            <div class="card">
+                <h3>Week 8: International Pricing Strategies</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Escalation, Transfer, and Grey Markets</strong><br><br>
+                    Pricing is the only "P" in the marketing mix that generates revenue; the others generate costs. International pricing is distinctly complex due to several phenomena:</p>
+                    
+                    <ul>
+                        <li><strong>Price Escalation:</strong> The disproportionate increase in the final retail price of an exported good due to the accumulation of international shipping, insurance, border tariffs, and multiple middleman margins.</li>
+                        <li><strong>Transfer Pricing:</strong> The internal, administrative price charged between affiliated subsidiaries of the same multinational corporation across national borders. It is highly scrutinized by governments because it is often manipulated to shift profits into low-tax countries.</li>
+                        <li><strong>Grey Markets (Parallel Importing):</strong> Occurs when unauthorized distributors buy authentic goods in a low-priced country and export them to a high-priced country, undercutting the manufacturer's official authorized retailers.</li>
+                        <li><strong>Global Pricing Orientations:</strong>
+                            <ul>
+                                <li><em>Ethnocentric:</em> One global price (often fails due to varying local incomes).</li>
+                                <li><em>Polycentric:</em> Local managers have total autonomy to set prices (can lead to Grey Markets).</li>
+                                <li><em>Geocentric:</em> A strategic baseline global price, but with coordinated, approved adjustments for local market realities.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Pricing abroad is a nightmare. Because you have to pay for cargo ships, border taxes, and foreign distributors, a cheap $10 item from the UK can easily cost $40 by the time it reaches a shelf in Brazil (Price Escalation). <br><br>
+                    Because of these price differences, "Grey Markets" pop up. This is when a clever entrepreneur realizes iPhones are 20% cheaper in Japan, buys 500 of them, and smugglers them into London to sell at a discount, ruining the brand's official pricing strategy.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>A high-end camera manufacturer realizes they are losing massive market share in South America due to <strong>Price Escalation</strong>; import tariffs are making their cameras unaffordable. To combat this, they change their entry mode. They stop Exporting and instead open a local manufacturing plant (FDI) inside South America. By producing locally, they bypass the border tariffs and international shipping costs, allowing them to drop the retail price and aggressively capture market share.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="week9" class="section">
+            <div class="card">
+                <h3>Week 9: Global Market Research</h3>
+                
+                <div class="academic-theory">
+                    <p><strong>Academic Theory: Data Gathering and Cultural Pitfalls</strong><br><br>
+                    The core objective of global market research is to identify foreign opportunities and mitigate the immense financial risk of international expansion.</p>
+                    
+                    <ul>
+                        <li><strong>Secondary Data:</strong> Pre-existing data (government census, trade association reports, competitor filings). It is fast, cost-effective, and should always be the mandatory first step. However, it may be outdated or lack specific relevance to the firm's unique problem.</li>
+                        <li><strong>Primary Data:</strong> Original, customized research collected specifically for the problem at hand (surveys, focus groups, observational research). It is highly accurate but expensive and time-consuming.</li>
+                        <li><strong>Cross-Cultural Pitfalls:</strong>
+                            <ul>
+                                <li><em>Conceptual Equivalence:</em> Concepts don't always map across cultures. (e.g., "Family" might mean nuclear family in the UK, but extended tribe in parts of Africa).</li>
+                                <li><em>Translation Errors:</em> Direct translation often destroys context. Researchers must use <strong>Back-Translation</strong> (translating from English to Mandarin, then having a different translator turn the Mandarin back to English to check for discrepancies).</li>
+                                <li><em>Infrastructure:</em> In emerging markets, street addresses may not exist, and internet penetration may be low, making random sampling nearly impossible.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="layman-box">
+                    <h4>💡 Layman's Translation</h4>
+                    <p>Before you launch a product abroad, you have to do your homework. Always Google it first (Secondary Data). It's cheap and stops you from making obvious mistakes. Don't pay thousands of dollars for custom surveys (Primary Data) until you've read all the free reports.<br><br>
+                    Most importantly, never just run a survey through Google Translate. The words might translate, but the meaning will change. If you don't double-check the translation with locals, you will get garbage data and launch a product nobody understands.</p>
+                </div>
+
+                <div class="scenario-box">
+                    <h4>🌍 Real-Life Scenario</h4>
+                    <p>A European firm wants to launch a line of electric bicycles in China. They smartly begin with <strong>Secondary Data</strong>, reviewing Chinese municipal transport regulations. They quickly discover that Chinese law strictly caps e-bike speeds at 20km/h and mandates a vehicle weight under 40kg. If they had skipped this secondary research and gone straight to primary consumer surveys about preferred colors, they would have manufactured thousands of heavy, fast e-bikes that were entirely illegal to ride in their target market.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '☀️ Light Mode';
+            } else {
+                html.setAttribute('data-theme', 'light');
+                btn.innerHTML = '🌙 Dark Mode';
+            }
+        }
+
+        // Navigation Logic
+        function nav(sectionId) {
+            // Hide all sections, remove active classes
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update Sidebar UI
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+                // Set Header Title based on sidebar text
+                document.getElementById('pageTitle').innerText = event.currentTarget.innerText;
+            }
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+            
+            // Scroll to top
+            document.getElementById('mainWrapper').scrollTo(0,0);
+        }
+
+        // Mobile Menu Toggle
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
