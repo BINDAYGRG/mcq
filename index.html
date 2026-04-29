@@ -3,195 +3,865 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Binaya Gurung</title>
+    <title>Zenith Master Hub | BM7403</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* --- THEMES & VARIABLES --- */
+        /* --- GLOBAL THEMES & VARIABLES --- */
         :root[data-theme="light"] {
             --bg-main: #f0f4f8; --bg-glass: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
-            --primary: #4f46e5; --secondary: #0f172a; --text-main: #1e293b; --text-muted: #64748b; 
-            --border: rgba(0, 0, 0, 0.1); --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
-            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --primary: #4f46e5; --primary-hover: #4338ca; --secondary: #0f172a;
+            --text-main: #1e293b; --text-muted: #475569; --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1); 
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --scenario: #3b82f6;
         }
         :root[data-theme="dark"] {
             --bg-main: #0b0f19; --bg-glass: rgba(15, 23, 42, 0.85); --bg-card: #1e293b;
-            --primary: #6366f1; --secondary: #f8fafc; --text-main: #f1f5f9; --text-muted: #94a3b8; 
-            --border: rgba(255, 255, 255, 0.1); --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
-            --success: #34d399; --warning: #fbbf24; --danger: #f87171;
+            --primary: #6366f1; --primary-hover: #818cf8; --secondary: #f8fafc;
+            --text-main: #f1f5f9; --text-muted: #cbd5e1; --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.5); 
+            --success: #34d399; --warning: #fbbf24; --danger: #f87171; --scenario: #60a5fa;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 
         body { 
-            display: flex; flex-direction: column; min-height: 100vh; color: var(--text-main); background: var(--bg-main);
+            background: var(--bg-main); color: var(--text-main); overflow: hidden;
             background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
                               radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 50%);
-            overflow-x: hidden;
         }
 
-        /* --- NAVBAR --- */
-        .navbar { 
-            background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border); padding: 20px 40px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); 
-        }
-        .brand { display: flex; flex-direction: column; }
-        .brand h1 { font-size: 28px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;}
-        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
-        
-        .btn-theme { 
-            background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); 
-            padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; 
-            box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px;
-        }
+        /* --- SPA VIEW CONTROLLER --- */
+        .app-view { display: none; height: 100vh; width: 100vw; }
+        .app-view.active { display: flex; }
+        .flex-col { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+        .flex-row { flex-direction: row; overflow: hidden; }
+
+        /* --- SHARED COMPONENTS --- */
+        .btn-theme { background: var(--bg-card); color: var(--secondary); border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
         .btn-theme:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        .brand h1 { font-size: 28px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; }
+        .brand span { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--border); background: var(--bg-glass); backdrop-filter: blur(20px); z-index: 100; }
+        .main-wrapper { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 12px; font-weight: 800; font-size: 18px; cursor: pointer; box-shadow: 0 10px 20px -10px var(--primary); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+        .mobile-toggle { display: none; background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* --- HERO SECTION --- */
+        /* --- SIDEBAR COMPONENTS (Course & Vault) --- */
+        .sidebar { width: 320px; background: var(--bg-glass); backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 20px; z-index: 100; flex-shrink: 0; }
+        .nav-menu { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .nav-menu::-webkit-scrollbar { width: 5px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+        .nav-item { padding: 14px 20px; border-radius: 12px; color: var(--text-muted); font-weight: 600; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; }
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); transform: translateX(5px); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 20px -10px var(--primary); font-weight: 700; }
+        .nav-count { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 20px; font-size: 12px; }
+
+        /* --- DASHBOARD SPECIFIC --- */
         .hero { padding: 60px 20px 40px; text-align: center; max-width: 900px; margin: 0 auto; width: 100%; }
-        .hero h2 { font-size: 48px; font-weight: 900; color: var(--secondary); margin-bottom: 20px; line-height: 1.2; }
-        .hero p { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; padding: 0 10px; }
-
-        /* --- GRID LAYOUT --- */
-        /* minmax(280px) ensures cards shrink to fit mobile screens perfectly without overflowing */
-        .module-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 25px; padding: 0 30px 80px 30px; max-width: 1200px; margin: 0 auto; width: 100%;
-        }
-        
-        /* --- LAUNCH CARDS --- */
-        .launch-card { 
-            background: var(--bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border); border-radius: 24px; padding: 35px 25px; 
-            box-shadow: var(--shadow); text-align: center; text-decoration: none; color: inherit; 
-            position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; 
-        }
+        .hero h2 { font-size: 48px; font-weight: 900; color: var(--secondary); margin-bottom: 20px; }
+        .hero p { font-size: 18px; color: var(--text-muted); line-height: 1.6; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 0 30px 80px 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .launch-card { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 24px; padding: 35px 25px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; }
         .launch-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.3); }
-        
-        .launch-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, var(--primary), var(--success)); opacity: 0; transition: 0.3s; }
+        .launch-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, var(--primary), var(--success)); opacity: 0; }
         .launch-card:hover::before { opacity: 1; }
-
         .card-icon { font-size: 55px; margin-bottom: 15px; }
         .card-title { font-size: 24px; font-weight: 800; color: var(--secondary); margin-bottom: 15px; }
         .card-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; flex-grow: 1; }
-        
-        .btn-launch { 
-            background: var(--primary); color: white; border: none; padding: 14px 20px; 
-            border-radius: 12px; font-weight: 800; font-size: 15px; display: inline-block; 
-            width: 100%; transition: 0.3s; 
-        }
-        .launch-card:hover .btn-launch { background: var(--primary-hover); transform: scale(1.03); }
+        .btn-launch { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 12px; font-weight: 800; width: 100%; }
+        .launch-card.exam { border-color: rgba(239, 68, 68, 0.3); }
+        .launch-card.exam:hover { border-color: var(--danger); box-shadow: 0 20px 40px -10px rgba(239, 68, 68, 0.2); }
+        .launch-card.exam .btn-launch { background: var(--danger); }
+        .launch-card.exam::before { background: linear-gradient(90deg, var(--danger), var(--warning)); }
 
-        /* Unique Mock Exam Styling */
-        .card-exam { border-color: rgba(239, 68, 68, 0.3); }
-        .card-exam:hover { border-color: var(--danger); box-shadow: 0 20px 40px -10px rgba(239, 68, 68, 0.2); }
-        .card-exam .btn-launch { background: var(--danger); }
-        .card-exam:hover .btn-launch { background: #dc2626; }
-        .card-exam::before { background: linear-gradient(90deg, var(--danger), var(--warning)); }
+        /* --- COURSE SPECIFIC --- */
+        .course-section { display: none; animation: slideIn 0.4s ease; max-width: 1000px; margin: 0 auto; }
+        .course-section.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .academic-theory { font-size: 17px; line-height: 1.8; margin-bottom: 25px; }
+        .academic-theory strong { color: var(--secondary); font-weight: 800; }
+        .academic-theory ul { margin-left: 20px; margin-top: 10px; margin-bottom: 15px; }
+        .layman-box { background: rgba(16, 185, 129, 0.08); border-left: 5px solid var(--success); padding: 25px; border-radius: 0 15px 15px 0; margin: 30px 0; }
+        .scenario-box { background: rgba(59, 130, 246, 0.08); border-left: 5px solid var(--scenario); padding: 25px; border-radius: 0 15px 15px 0; margin: 30px 0; }
 
-        /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 768px) {
-            .navbar { padding: 15px 20px; }
-            .brand h1 { font-size: 24px; }
-            
-            .hero { padding: 40px 15px 30px; }
-            .hero h2 { font-size: 34px; }
-            .hero p { font-size: 16px; }
-            
-            .module-grid { padding: 0 15px 50px 15px; gap: 20px; grid-template-columns: 1fr; }
-            .launch-card { padding: 25px 20px; }
-            .card-icon { font-size: 45px; }
-            .card-title { font-size: 22px; }
-        }
-        
-        @media (max-width: 380px) {
-            .btn-theme span { display: none; } /* Hide text, keep emoji on tiny screens */
-            .btn-theme { padding: 10px; border-radius: 50%; }
+        /* --- VAULT SPECIFIC --- */
+        .search-bar { padding: 12px 20px; border-radius: 50px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-size: 16px; width: 300px; outline: none; }
+        .search-bar:focus { border-color: var(--primary); }
+        .qa-card { background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 20px; overflow: hidden; position: relative; }
+        .qa-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .qa-cat { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 800; text-transform: uppercase; }
+        .qa-q { font-size: 22px; font-weight: 800; color: var(--secondary); margin-bottom: 20px; line-height: 1.4; }
+        .study-mode .qa-body { display: none; }
+        .qa-card.revealed .qa-body { display: block; animation: slideIn 0.4s ease; }
+        .qa-a { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); padding: 15px 20px; border-radius: 8px; color: var(--success); font-weight: 700; font-size: 18px; margin-bottom: 15px; }
+        .qa-e { background: var(--bg-card); padding: 20px; border-radius: 12px; font-size: 16px; border: 1px solid var(--border); }
+        .reveal-hint { display: none; color: var(--primary); font-weight: 700; font-size: 14px; cursor: pointer; }
+        .study-mode .reveal-hint { display: block; }
+        .study-mode .qa-card { cursor: pointer; }
+        .study-mode .qa-card.revealed .reveal-hint { display: none; }
+
+        /* --- EXAM SPECIFIC --- */
+        .exam-screen { display: none; animation: slideIn 0.4s ease; }
+        .exam-screen.active { display: block; }
+        .timer-hud { position: sticky; top: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 50; margin-bottom: 30px; }
+        .hud-text { font-size: 32px; font-weight: 900; color: var(--danger); font-variant-numeric: tabular-nums; }
+        .progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); width: 0%; transition: width 0.4s ease; }
+        .opt-grid { display: grid; gap: 15px; margin-bottom: 30px; }
+        .opt-btn { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; font-weight: 600; transition: 0.2s; }
+        .opt-btn:hover { border-color: var(--primary); transform: translateX(5px); }
+        .opt-btn.selected { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .opt-l { width: 40px; height: 40px; background: rgba(99, 102, 241, 0.1); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-weight: 900; flex-shrink: 0; }
+        .opt-btn.selected .opt-l { background: var(--primary); color: white; }
+        .score-circle { width: 180px; height: 180px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 56px; font-weight: 900; margin: 0 auto 30px; }
+        .rev-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .rev-card.correct { border-left: 6px solid var(--success); }
+        .rev-card.wrong { border-left: 6px solid var(--danger); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; transition: left 0.4s ease; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .header-bar { flex-wrap: wrap; gap: 15px; padding: 15px 20px; }
+            .main-wrapper { padding: 20px; }
+            .search-bar { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="brand">
-            <h1>ZENITH</h1>
-            <span>Master Dashboard</span>
+    <div id="view-dashboard" class="app-view flex-col active">
+        <div class="header-bar">
+            <div class="brand">
+                <h1>ZENITH</h1>
+                <span>Master Dashboard</span>
+            </div>
+            <button class="btn-theme" onclick="toggleGlobalTheme()"><span class="theme-text">☀️ Light Mode</span></button>
         </div>
-        <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><span>☀️ Light Mode</span></button>
+
+        <div class="hero">
+            <h2>Welcome BINAYA</h2>
+            <p>Your entire International Strategic Marketing module is organized here. Select an app below to launch your study session.</p>
+        </div>
+
+        <div class="module-grid">
+            <div class="launch-card" onclick="switchApp('view-course')">
+                <div class="card-icon">📚</div>
+                <div class="card-title">Deep Study Hub</div>
+                <div class="card-desc">The complete syllabus (Weeks 1-9). Master the academic theory, layman's translations, and real-life business scenarios.</div>
+                <button class="btn-launch">Open Study Hub →</button>
+            </div>
+            <div class="launch-card" onclick="switchApp('view-vault')">
+                <div class="card-icon">📖</div>
+                <div class="card-title">150+ Q&A Vault</div>
+                <div class="card-desc">Rapid review of over 150 questions. Includes "Study Mode" to hide answers and test your active recall instantly.</div>
+                <button class="btn-launch">Open Q&A Vault →</button>
+            </div>
+            <div class="launch-card exam" onclick="switchApp('view-exam')">
+                <div class="card-icon">⏱️</div>
+                <div class="card-title">1-Hour Mock Exam</div>
+                <div class="card-desc">The ultimate test. 50 random questions, a strict 60-minute countdown, and an AI diagnostic report pinpointing weak spots.</div>
+                <button class="btn-launch">Launch Live Exam →</button>
+            </div>
+        </div>
     </div>
 
-    <div class="hero">
-        <h2>Welcome BINAYA</h2>
-        <p>Your entire International Strategic Marketing module is organized here. Select an app below to launch your study session.</p>
+
+    <div id="view-course" class="app-view flex-row">
+        <div class="sidebar" id="course-sidebar">
+            <div class="brand" style="margin-bottom: 30px; text-align: center;">
+                <h1>BM7403</h1>
+                <span>Deep Study Hub</span>
+            </div>
+            <div class="nav-menu" id="course-nav">
+                <div class="nav-item active" onclick="navCourse('week1', this)">Week 1: Intro & Glocalization</div>
+                <div class="nav-item" onclick="navCourse('week2', this)">Week 2: Market Environment</div>
+                <div class="nav-item" onclick="navCourse('week3', this)">Week 3: Product Decisions</div>
+                <div class="nav-item" onclick="navCourse('week4', this)">Week 4: Socio-Cultural</div>
+                <div class="nav-item" onclick="navCourse('week56', this)">Weeks 5 & 6: Entry Modes</div>
+                <div class="nav-item" onclick="navCourse('week7', this)">Week 7: Communication</div>
+                <div class="nav-item" onclick="navCourse('week8', this)">Week 8: Pricing Strategies</div>
+                <div class="nav-item" onclick="navCourse('week9', this)">Week 9: Global Research</div>
+            </div>
+        </div>
+
+        <div class="flex-col" style="flex: 1; position: relative;" id="course-main">
+            <div class="header-bar" style="position: sticky; top: 0;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-toggle" onclick="document.getElementById('course-sidebar').classList.toggle('open')">☰ Menu</button>
+                    <h2 id="course-title" style="font-size: 24px; font-weight: 800;">Week 1: Intro & Glocalization</h2>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-theme" onclick="switchApp('view-dashboard')">🏠 Dashboard</button>
+                    <button class="btn-theme" onclick="toggleGlobalTheme()"><span class="theme-text">☀️ Light</span></button>
+                </div>
+            </div>
+
+            <div class="main-wrapper">
+                <div id="course-week1" class="course-section active">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">Introduction to International Strategic Marketing</h3>
+                        <div class="academic-theory">
+                            <p><strong>Academic Theory: The Multidimensional Challenge</strong><br><br>
+                            International marketing is the execution of one or more marketing mix decisions across national boundaries. The core strategic debate is <strong>Standardization vs. Adaptation</strong>.</p>
+                            <ul>
+                                <li><strong>Standardization:</strong> Driven by economies of scale. Creates unified global brand but risks alienating locals.</li>
+                                <li><strong>Adaptation:</strong> Driven by consumer differences and strict local regulations.</li>
+                            </ul>
+                            <p>The modern solution is <strong>Glocalization</strong> ("Think Global, Act Local"). Approach is dictated by the <strong>EPRG Framework</strong> (Ethnocentric, Polycentric, Geocentric).</p>
+                        </div>
+                        <div class="layman-box">
+                            <h4>💡 Layman's Translation</h4>
+                            <p>Selling locally is checkers; selling globally is 3D chess. Glocalization is the ultimate compromise: build the expensive, hidden parts of the product the same way everywhere, but change the outside features and ads so they fit the local vibe.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week2" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">International Market Environment</h3>
+                        <div class="academic-theory">
+                            <p><strong>Academic Theory: Environmental Scanning</strong><br><br>
+                            Firms conduct multi-layered scanning before entry.</p>
+                            <ul>
+                                <li><strong>Macro (PESTEL):</strong> Political, Economic, Social, Technological, Environmental, Legal. Evaluates uncontrollable external forces.</li>
+                                <li><strong>Meso (Porter’s Five Forces):</strong> Assesses industry profit potential (Rivalry, Substitutes, New Entrants, Buyer/Supplier power).</li>
+                                <li><strong>National Advantage (Porter’s Diamond):</strong> Explains why nations achieve dominance (e.g., German cars via demanding buyers and strong supply chains).</li>
+                            </ul>
+                        </div>
+                        <div class="layman-box">
+                            <h4>💡 Layman's Translation</h4>
+                            <p>PESTEL is the satellite view—checking the country's economy. Porter's Five Forces is the drone view—looking at direct rivals to see if the market is too crowded.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="course-week3" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">International Product Decisions</h3>
+                        <div class="academic-theory">
+                            <p><strong>Academic Theory: Product Levels</strong></p>
+                            <ol>
+                                <li><strong>Core:</strong> Fundamental benefit.</li>
+                                <li><strong>Actual:</strong> Physical attributes and brand.</li>
+                                <li><strong>Augmented:</strong> Warranties and delivery networks.</li>
+                            </ol>
+                            <p>Adaptations are either <strong>Mandatory</strong> (legal/safety) or <strong>Discretionary</strong> (taste/preferences). Beware the <strong>Country of Origin (COO) Effect</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week4" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">Socio-Cultural Considerations</h3>
+                        <div class="academic-theory">
+                            <p><strong>Academic Theory: The Invisible Matrix</strong><br><br>
+                            <strong>Hofstede’s Dimensions:</strong> Power Distance, Individualism/Collectivism, Masculinity/Femininity, Uncertainty Avoidance. <br><br>
+                            Beware the <strong>Self-Reference Criterion (SRC)</strong>—evaluating foreign markets through your own cultural lens.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week56" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">Market Selection & Entry Modes</h3>
+                        <div class="academic-theory">
+                            <p>Screening uses the <strong>MACS Matrix</strong> (Market Attractiveness / Competitive Strength). Entry modes balance Risk vs Control:</p>
+                            <ol>
+                                <li><strong>Exporting:</strong> Low risk, low control.</li>
+                                <li><strong>Licensing/Franchising:</strong> Moderate risk.</li>
+                                <li><strong>Joint Ventures:</strong> Shared risk, high conflict potential.</li>
+                                <li><strong>FDI (Wholly Owned Subsidiary):</strong> Max control, max financial risk.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week7" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">International Communication Strategies</h3>
+                        <div class="academic-theory">
+                            <p>Communication faces <strong>Noise</strong> (cultural taboos, translations). Strategies are either <strong>Push</strong> (focusing on wholesalers) or <strong>Pull</strong> (mass media to consumers). Ad campaigns can be standardized globally or heavily adapted.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week8" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">International Pricing Strategies</h3>
+                        <div class="academic-theory">
+                            <ul>
+                                <li><strong>Price Escalation:</strong> Massive price increase abroad due to tariffs/shipping.</li>
+                                <li><strong>Grey Markets:</strong> Unauthorized arbitrage due to price gaps between countries.</li>
+                                <li><strong>Geocentric Pricing:</strong> Baseline global price with coordinated local adjustments.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="course-week9" class="course-section">
+                    <div class="card">
+                        <h3 style="font-size: 28px; color: var(--primary); margin-bottom: 20px;">Global Market Research</h3>
+                        <div class="academic-theory">
+                            <p>Always begin with <strong>Secondary Data</strong> (fast, cheap). If inadequate, move to <strong>Primary Data</strong> (surveys). Beware <strong>Conceptual Equivalence</strong> and Translation Errors (always use Back-Translation).</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
     </div>
 
-    <div class="module-grid">
-        
-        <a href="course.html" class="launch-card">
-            <div class="card-icon">📚</div>
-            <div class="card-title">Deep Study Hub</div>
-            <div class="card-desc">The complete syllabus (Weeks 1-9). Master the academic theory, layman's translations, and real-life business scenarios.</div>
-            <div class="btn-launch">Open Study Hub →</div>
-        </a>
 
-        <a href="vault.html" class="launch-card">
-            <div class="card-icon">📖</div>
-            <div class="card-title">150+ Q&A Vault</div>
-            <div class="card-desc">Rapid review of over 150 questions. Includes "Study Mode" to hide answers and test your active recall instantly.</div>
-            <div class="btn-launch">Open Q&A Vault →</div>
-        </a>
+    <div id="view-vault" class="app-view flex-row">
+        <div class="sidebar" id="vault-sidebar">
+            <div class="brand" style="margin-bottom: 30px; text-align: center;">
+                <h1>Q&A VAULT</h1>
+                <span>BM7403 • 150 Questions</span>
+            </div>
+            <div class="nav-menu" id="vault-nav">
+                <div class="nav-item active" onclick="filterVault('All', this)">All Questions <span class="nav-count">150</span></div>
+                <div class="nav-item" onclick="filterVault('Week 1', this)">Week 1: Basics <span class="nav-count">15</span></div>
+                <div class="nav-item" onclick="filterVault('Week 2', this)">Week 2: Environment <span class="nav-count">20</span></div>
+                <div class="nav-item" onclick="filterVault('Week 3', this)">Week 3: Product <span class="nav-count">15</span></div>
+                <div class="nav-item" onclick="filterVault('Week 4', this)">Week 4: Culture <span class="nav-count">20</span></div>
+                <div class="nav-item" onclick="filterVault('Week 5', this)">Week 5/6: Entry Modes <span class="nav-count">20</span></div>
+                <div class="nav-item" onclick="filterVault('Week 7', this)">Week 7: Comms <span class="nav-count">15</span></div>
+                <div class="nav-item" onclick="filterVault('Week 8', this)">Week 8: Pricing <span class="nav-count">15</span></div>
+                <div class="nav-item" onclick="filterVault('Week 9', this)">Week 9: Research <span class="nav-count">15</span></div>
+                <div class="nav-item" onclick="filterVault('Case', this)">Case & Trends <span class="nav-count">15</span></div>
+            </div>
+        </div>
 
-        <a href="mock3.html" class="launch-card">
-            <div class="card-icon">🧠</div>
-            <div class="card-title">Deep Analysis Vault</div>
-            <div class="card-desc">The ultimate deep-dive. 150 unique questions where EVERY single option (A, B, C, D) is analyzed and explained.</div>
-            <div class="btn-launch">Open Deep Analysis →</div>
-        </a>
+        <div class="flex-col" style="flex: 1; position: relative;">
+            <div class="header-bar" style="position: sticky; top: 0;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-toggle" onclick="document.getElementById('vault-sidebar').classList.toggle('open')">☰ Menu</button>
+                    <h2 id="vault-title" style="font-size: 24px;">All Questions</h2>
+                </div>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" class="search-bar" id="vault-search" placeholder="Search questions..." onkeyup="searchVault()">
+                    <button class="btn" id="studyBtn" style="padding: 10px 20px; font-size: 14px;" onclick="toggleStudyMode()">🧠 Study Mode: OFF</button>
+                    <button class="btn-theme" onclick="switchApp('view-dashboard')">🏠 Dash</button>
+                </div>
+            </div>
 
-        <a href="mock4.html" class="launch-card card-exam">
-            <div class="card-icon">⏱️</div>
-            <div class="card-title">1-Hour Mock Exam</div>
-            <div class="card-desc">The ultimate test. 50 random questions, a strict 60-minute countdown, and an AI diagnostic report pinpointing weak spots.</div>
-            <div class="btn-launch">Launch Live Exam →</div>
-        </a>
-
+            <div class="main-wrapper">
+                <div id="vault-grid" style="display: flex; flex-direction: column; gap: 20px;"></div>
+            </div>
+        </div>
     </div>
+
+
+    <div id="view-exam" class="app-view flex-col">
+        <div class="header-bar">
+            <div class="brand">
+                <h1>EXAM HUB</h1>
+                <span>1-Hour Simulator</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-theme" onclick="switchApp('view-dashboard')">🏠 Dashboard</button>
+                <button class="btn-theme" onclick="toggleGlobalTheme()"><span class="theme-text">☀️ Light</span></button>
+            </div>
+        </div>
+
+        <div class="main-wrapper" style="display: flex; justify-content: center; align-items: flex-start;">
+            <div style="width: 100%; max-width: 900px;">
+                
+                <div id="exam-start" class="exam-screen active card" style="text-align: center; padding: 60px 30px;">
+                    <div style="font-size: 60px; margin-bottom: 20px;">⏱️</div>
+                    <h2 style="font-size: 40px; color: var(--secondary); font-weight: 900; margin-bottom: 15px;">1-Hour Mock Exam</h2>
+                    <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6;">
+                        This engine will randomly select <strong>50 unique questions</strong> from the master database. You have exactly <strong>60 minutes</strong>. The exam auto-submits when the timer hits zero.
+                    </p>
+                    <button class="btn" onclick="startExam()">Begin Examination</button>
+                </div>
+
+                <div id="exam-running" class="exam-screen">
+                    <div class="timer-hud">
+                        <div>
+                            <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Time Remaining</div>
+                            <div id="timerDisplay" class="hud-text">60:00</div>
+                        </div>
+                        <button class="btn" style="padding: 10px 20px; font-size: 14px; background: var(--danger); box-shadow: none;" onclick="forceSubmit()">Submit Early</button>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <span id="exam-cat" style="color: var(--primary); background: rgba(99, 102, 241, 0.1); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 800; text-transform: uppercase;">Category</span>
+                            <span id="exam-counter" style="font-weight: 800; color: var(--text-muted);">Q 1 / 50</span>
+                        </div>
+                        <div class="progress-bar"><div id="exam-progress" class="progress-fill"></div></div>
+                        
+                        <h3 id="exam-q" style="font-size: 24px; font-weight: 800; color: var(--secondary); margin-bottom: 30px;">Loading...</h3>
+                        <div id="exam-opts" class="opt-grid"></div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
+                            <button class="btn" id="btnPrev" style="background: var(--bg-main); color: var(--secondary); border: 1px solid var(--border); box-shadow: none;" onclick="prevQuestion()" disabled>← Previous</button>
+                            <button class="btn" id="btnNext" onclick="nextQuestion()" disabled>Next Question →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="exam-results" class="exam-screen">
+                    <div class="card" style="text-align: center;">
+                        <h2 style="font-size: 40px; color: var(--secondary); font-weight: 900; margin-bottom: 30px;">Exam Completed</h2>
+                        <div class="score-circle" id="exam-pct">0%</div>
+                        <h3 id="exam-msg" style="font-size: 24px; margin-bottom: 10px; color: var(--primary);">Calculating...</h3>
+                        <p id="exam-marks" style="font-size: 18px; color: var(--text-muted); font-weight: 700; margin-bottom: 30px;">Marks: 0 / 50</p>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.1); border-left: 5px solid var(--warning); padding: 25px; border-radius: 16px; margin: 30px 0; text-align: left;">
+                            <h4 style="color: var(--warning); font-size: 20px; margin-bottom: 15px;">🧠 Weak Points Detected</h4>
+                            <ul id="exam-diag" style="list-style: none; padding: 0; font-size: 16px; font-weight: 600; line-height: 1.8;"></ul>
+                        </div>
+                        <button class="btn" onclick="startExam()">Retake Exam</button>
+                    </div>
+
+                    <div style="font-size: 28px; font-weight: 900; color: var(--secondary); margin: 40px 0 20px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px;">Detailed Answer Review</div>
+                    <div id="exam-review"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <script>
-        // Simple Theme Toggle
-        function toggleTheme() {
-            const html = document.documentElement;
-            const btn = document.getElementById('themeBtn');
-            const span = btn.querySelector('span') || btn;
+        // --- MASTER 150-QUESTION DATABASE ---
+        const MASTER_DB = [
+            // Week 1
+            { c: "Week 1", q: "According to Hollensen, what fundamentally defines International Marketing?", o: ["Lack of competitors", "Making marketing mix decisions across national boundaries", "Domestic sales only", "Standardizing everything"], a: 1, e: "It requires cross-border execution, introducing immense legal and cultural complexity." },
+            { c: "Week 1", q: "Which statement best describes 'Glocalization'?", o: ["Applying exact same strategy worldwide", "Building unique products from scratch everywhere", "Balancing global economies of scale with local responsiveness", "Outsourcing production"], a: 2, e: "'Think Global, Act Local'. It standardizes core components while adapting outer features." },
+            { c: "Week 1", q: "In the EPRG Framework, what does an 'Ethnocentric' approach mean?", o: ["World-oriented view", "Applying home-country standard to all foreign markets", "Adapting uniquely everywhere", "Opportunistic selection"], a: 1, e: "The firm assumes what works at home will work abroad automatically." },
+            { c: "Week 1", q: "What is the primary operational benefit of Product Standardization?", o: ["Local relevance", "Bypassing tariffs", "Economies of scale in production", "Meeting safety laws"], a: 2, e: "Producing identical units globally massively reduces costs." },
+            { c: "Week 1", q: "What is 'Modularization'?", o: ["Small geographic modules", "Standardizing internal components while adapting exterior", "Hiring temporary staff", "Using multiple ad agencies"], a: 1, e: "It allows a company to gain economies of scale on internal parts while customizing the outside." },
+            { c: "Week 1", q: "Why is 'Coordination' a major challenge in global marketing?", o: ["Requires one language", "Branches may compete against each other", "Illegal under WTO", "Prevents research"], a: 1, e: "Without coordination, a UK branch might cannibalize sales from a French branch." },
+            { c: "Week 1", q: "What characterizes a 'Polycentric' firm?", o: ["Assume home culture is superior", "Look for global similarities", "Grant local managers total autonomy", "Only sell digitally"], a: 2, e: "They adapt to everything, maximizing local relevance but sacrificing scale." },
+            { c: "Week 1", q: "What does 'Administrative Distance' refer to?", o: ["Physical miles", "Cultural values", "Bureaucracy, corruption, and institutional differences", "Management salaries"], a: 2, e: "High distance means dealing with vastly different red tape and taxes." },
+            { c: "Week 1", q: "Which of the following is an 'uncontrollable' element for an international marketer?", o: ["Product design", "Promotional budget", "Foreign political environment", "Distribution channel"], a: 2, e: "Marketers cannot control foreign governments or laws; they must adapt to them." },
+            { c: "Week 1", q: "Which approach is most prone to the 'Self-Reference Criterion' bias?", o: ["Geocentric", "Polycentric", "Ethnocentric", "Regiocentric"], a: 2, e: "Ethnocentric firms assume their home culture is universally applicable." },
+            { c: "Week 1", q: "How does the physical 'Infrastructure' of a host country impact marketing?", o: ["Determines language", "Dictates physical distribution capabilities", "Establishes tariffs", "Prevents standardization"], a: 1, e: "Lack of paved roads or cold-chain limits how products are delivered." },
+            { c: "Week 1", q: "What is the ultimate goal of an International Strategic Marketing Plan?", o: ["Identical prices everywhere", "Eliminate culture", "Create sustainable competitive advantage across borders", "Digital only marketing"], a: 2, e: "The goal is to navigate global/local tension to outperform competitors." },
+            { c: "Week 1", q: "What is the key danger of absolute Standardization?", o: ["High R&D cost", "Alienating local consumers", "Complicated supply chains", "Loss of control"], a: 1, e: "If you ignore local tastes, consumers will reject the product." },
+            { c: "Week 1", q: "What is the key danger of absolute Adaptation?", o: ["Too cheap", "Loss of economies of scale", "Legal issues", "Government bans"], a: 1, e: "Changing everything for every country destroys profit margins." },
+            { c: "Week 1", q: "In the EPRG framework, what is a Geocentric approach?", o: ["Home country focus", "Local autonomy", "Targeting global segments with localized execution", "Region-only focus"], a: 2, e: "Geocentric seeks global integration with local responsiveness." },
             
-            if (html.getAttribute('data-theme') === 'light') {
-                html.setAttribute('data-theme', 'dark');
-                span.innerHTML = '☀️ Light Mode';
-                if(!btn.querySelector('span')) btn.innerHTML = '☀️';
+            // Week 2
+            { c: "Week 2", q: "When a country raises import tariffs, in PESTEL this falls under:", o: ["Technological", "Social", "Political/Legal", "Environmental"], a: 2, e: "Tariffs and trade embargoes are government political actions." },
+            { c: "Week 2", q: "In Porter's Five Forces, which scenario makes an industry highly attractive?", o: ["High Threat of Substitutes", "High Barriers to Entry", "High Buyer Power", "Intense Rivalry"], a: 1, e: "High barriers keep new competitors out, protecting existing profits." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Currency Exchange Rates'?", o: ["Political", "Economic", "Social", "Legal"], a: 1, e: "Exchange rates and inflation are macroeconomic variables." },
+            { c: "Week 2", q: "What is the primary purpose of Porter's Diamond of National Advantage?", o: ["Evaluate internal strengths", "Assess macro environment", "Explain why certain countries dominate specific industries", "Calculate shipping"], a: 2, e: "It analyzes why nations excel at specific things (e.g., German cars)." },
+            { c: "Week 2", q: "In Porter's Diamond, what are 'Demand Conditions'?", o: ["Global raw material demand", "Sophisticated local consumers forcing innovation", "Tax demands", "Export volume"], a: 1, e: "Demanding home buyers force local companies to improve quality." },
+            { c: "Week 2", q: "In the Value Chain, is 'Inbound Logistics' a Primary or Support activity?", o: ["Support", "Primary", "Secondary", "Tertiary"], a: 1, e: "It directly involves receiving and managing raw materials." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what is a 'Substitute'?", o: ["Direct competitor", "Product from a different industry solving the same problem", "Cheaper raw material", "Ad channel"], a: 1, e: "E.g., Streaming services are a substitute for physical theaters." },
+            { c: "Week 2", q: "What does 'Expropriation' mean?", o: ["Government seizing foreign assets", "Dumping goods", "Bribing officials", "Currency drop"], a: 0, e: "It is the ultimate political risk where a host country seizes your factory." },
+            { c: "Week 2", q: "In a SWOT analysis, where do PESTEL factors belong?", o: ["Strengths/Weaknesses", "Opportunities/Threats", "Only Threats", "They don't belong"], a: 1, e: "PESTEL scans the external environment (Opportunities/Threats)." },
+            { c: "Week 2", q: "True or False: In Porter's Diamond, strong domestic rivalry hurts global chances.", o: ["True", "False", "Only for SMEs", "Only in emerging markets"], a: 1, e: "False. Fierce domestic competition forces firms to become strong before expanding." },
+            { c: "Week 2", q: "In the Value Chain, 'HR Management' is classified as:", o: ["Primary", "Support", "External Threat", "Inbound Logistics"], a: 1, e: "HR facilitates primary activities by providing trained staff." },
+            { c: "Week 2", q: "Which PESTEL factor covers 'Urbanisation'?", o: ["Economic", "Technological", "Social", "Political"], a: 2, e: "Urbanisation and demographics are Social trends." },
+            { c: "Week 2", q: "How do 'Related and Supporting Industries' help in Porter's Diamond?", o: ["Increase substitutes", "Provide strong local supply chains", "Lower tariffs", "Decrease rivalry"], a: 1, e: "World-class local suppliers give manufacturers massive cost and speed advantages." },
+            { c: "Week 2", q: "In Porter's 5 Forces, what increases 'Buyer Power'?", o: ["High switching costs", "Buying in massive bulk volumes", "Unique products", "Patents"], a: 1, e: "Massive volume buyers (like Walmart) can force suppliers to lower prices." },
+            { c: "Week 2", q: "What is an 'Economic' risk in international marketing?", o: ["A new data law", "Sudden hyperinflation in the host country", "Aging population", "Climate change"], a: 1, e: "Inflation destroys purchasing power and profit margins." },
+
+            // Week 3
+            { c: "Week 3", q: "Warranties, delivery, and installation make up the:", o: ["Core Product", "Actual Product", "Augmented Product", "Standardized Product"], a: 2, e: "Augmented product encompasses non-physical support services." },
+            { c: "Week 3", q: "What is the Country of Origin (COO) Effect?", o: ["Shipping tax", "Bias where consumers judge quality based on manufacture location", "Labeling law", "Local hiring requirement"], a: 1, e: "Assuming 'Swiss Made' implies superior engineering." },
+            { c: "Week 3", q: "What is 'Mandatory Adaptation'?", o: ["Changes dictated by absolute legal or safety requirements", "Changes for local taste", "New product invention", "Instruction translation"], a: 0, e: "Changing electrical voltage to legally sell in Europe." },
+            { c: "Week 3", q: "What is 'Discretionary Adaptation'?", o: ["Safety laws", "Changes made to align with local tastes to increase sales", "Brand new name", "Ignoring culture"], a: 1, e: "Adding spicy flavors to a global fast-food menu." },
+            { c: "Week 3", q: "What is 'Product Invention'?", o: ["Filing a patent", "Selling identical products", "Creating a new product from scratch for a foreign market", "Changing color"], a: 2, e: "Used when extending or adapting simply will not work." },
+            { c: "Week 3", q: "How do Consumer Income Levels dictate product decisions?", o: ["Premium sells everywhere", "Firms strip down products to make them affordable", "Only affects B2B", "Forces JVs"], a: 1, e: "Removing premium features lowers the entry price for developing nations." },
+            { c: "Week 3", q: "What is a 'Product Line Extension'?", o: ["Extended warranty", "Adding new variations to capture a new demographic", "Moving factories", "Acquisition"], a: 1, e: "E.g., LEGO launching 'LEGO Friends' for girls." },
+            { c: "Week 3", q: "What does 'Ease of Distribution' refer to in product policy?", o: ["Social media speed", "Physical infrastructure available to move the product", "Packaging language", "IP laws"], a: 1, e: "Without cold-chain trucks, you cannot sell frozen goods." },
+            { c: "Week 3", q: "Why is 'Brand Equity' important?", o: ["Allows launching new products with instant consumer trust", "Eliminates tariffs", "Prevents competitor ads", "Guarantees JVs"], a: 0, e: "Swiss Army used knife equity to sell watches." },
+            { c: "Week 3", q: "Can the COO effect be negative?", o: ["No", "Yes, if a country has a reputation for poor manufacturing", "Only in automotive", "Only if standardized"], a: 1, e: "Consumers avoid products from nations known for cheap/unsafe labor." },
+            { c: "Week 3", q: "The 'Core Product' refers to:", o: ["Packaging", "The fundamental problem-solving benefit the consumer buys", "Warranty", "Shipping method"], a: 1, e: "You buy 'the ability to make a hole', not a drill." },
+            { c: "Week 3", q: "Why might packaging require adaptation?", o: ["Save cardboard", "Comply with recycling laws or cultural color associations", "Never required", "Only for Pull strategy"], a: 1, e: "White means mourning in some cultures, bad for festive packaging." },
+            { c: "Week 3", q: "What is an 'Actual Product'?", o: ["The warranty", "The raw materials", "The physical attributes, design, and brand name", "The feeling of use"], a: 2, e: "It is the tangible item you hold in your hand." },
+            { c: "Week 3", q: "When entering a market with high illiteracy, how should packaging adapt?", o: ["More text", "Heavy use of visual symbols and color coding", "Remove all text", "No change needed"], a: 1, e: "Visual cues replace written instructions." },
+            { c: "Week 3", q: "A 'Global Brand' uses:", o: ["Different names everywhere", "The same name, logo, and positioning worldwide", "Only digital ads", "No packaging"], a: 1, e: "Apple and Coca-Cola rely on instant global recognition." },
+
+            // Week 4
+            { c: "Week 4", q: "How do cultures with 'High Uncertainty Avoidance' behave?", o: ["Embrace innovation", "Prioritize group harmony", "Feel threatened by ambiguity and rely on strict rules", "Accept unequal power"], a: 2, e: "They hate the unknown and demand guarantees (e.g. Japan, Germany)." },
+            { c: "Week 4", q: "What is the Self-Reference Criterion (SRC)?", o: ["Competitor evaluation tool", "Back-translation process", "Unconscious tendency to evaluate foreign markets using home cultural values", "Cultural merging"], a: 2, e: "It causes marketers to arrogantly run offensive or confusing campaigns." },
+            { c: "Week 4", q: "How is Culture defined?", o: ["Legal framework", "Sum total of learned beliefs and customs directing behavior", "Physical infrastructure", "Biological traits"], a: 1, e: "It acts as the invisible operating system of a society." },
+            { c: "Week 4", q: "What defines a 'High-Context' culture?", o: ["Direct, explicit communication", "Communication relies heavily on non-verbal cues and relationships", "People yell", "High GDP"], a: 1, e: "How you say it matters more than the literal words (e.g. Saudi Arabia)." },
+            { c: "Week 4", q: "Why is humor dangerous in cross-cultural advertising?", o: ["Too expensive", "Highly subjective and easily offensive in other cultures", "Violates WTO", "Distracts from product"], a: 1, e: "A sarcastic UK joke may deeply offend a Chinese audience." },
+            { c: "Week 4", q: "What is 'Power Distance (PDI)'?", o: ["Physical distance", "Degree to which unequal distribution of power is accepted", "Wage gap", "Energy consumption"], a: 1, e: "High PDI cultures respect strict hierarchy without question." },
+            { c: "Week 4", q: "What is 'Individualism vs. Collectivism'?", o: ["Single vs Bulk buying", "Focus on 'I' (self-reliance) vs 'We' (group harmony)", "Direct vs JV modes", "Rich vs Poor gap"], a: 1, e: "Collectivist cultures value family and community benefit over personal rebellion." },
+            { c: "Week 4", q: "What is 'Masculinity vs. Femininity' in Hofstede's model?", o: ["Gender ratio", "Preference for achievement/material success vs caring/quality of life", "Targeting one gender", "Women's legal rights"], a: 1, e: "Masculine cultures love status symbols and competition." },
+            { c: "Week 4", q: "What is 'Back-Translation'?", o: ["Stealing competitor ads", "Translating to foreign language, then having a different person translate it back", "Post-survey translation", "Google Translate backwards"], a: 1, e: "Essential to ensure cultural nuance and meaning are not lost." },
+            { c: "Week 4", q: "Why does IKEA adapt its catalog imagery globally?", o: ["Hide prices", "Reflect local living spaces and cultural norms", "Sell different furniture", "Avoid shipping taxes"], a: 1, e: "Japanese catalogs show smaller rooms; Saudi catalogs reflect modesty norms." },
+            { c: "Week 4", q: "If an ad focuses heavily on personal rebellion, what culture does it target?", o: ["High Uncertainty Avoidance", "High Individualism", "High Collectivism", "High Power Distance"], a: 1, e: "Rebellion appeals to individual expression, not group harmony." },
+            { c: "Week 4", q: "How does high Uncertainty Avoidance affect product launches?", o: ["Instant adoption", "Consumers are slow to adopt new innovations", "Ignore warranties", "Prevents standardization"], a: 1, e: "Marketers must offer free trials to lower perceived risk." },
+            { c: "Week 4", q: "What is 'Ethnocentrism'?", o: ["Belief that one's own culture is superior", "Blending of two cultures", "Hiring local managers", "Targeting minorities"], a: 0, e: "Causes managers to push home-country strategies that fail abroad." },
+            { c: "Week 4", q: "Is 'Psychic Distance' a Hofstede dimension?", o: ["Yes", "No", "Only in 2010 model", "Yes, replaced Power Distance"], a: 1, e: "No. It relates to market entry strategy, not core cultural values." },
+            { c: "Week 4", q: "What defines a 'Low-Context' culture?", o: ["Subtle metaphors", "Direct, explicit, and literal communication", "Low literacy", "Heavy use of symbols"], a: 1, e: "They value direct facts (e.g. USA, Germany)." },
+
+            // Week 5/6
+            { c: "Week 5", q: "What does the MACS Matrix stand for?", o: ["Macro And Cultural Strategy", "Market Attractiveness / Competitive Strength", "Marketing And Cost Systems", "Micro Analysis Control"], a: 1, e: "Quantitative tool to score which foreign markets to enter." },
+            { c: "Week 5", q: "What variables define 'Market Attractiveness' in MACS?", o: ["Brand awareness", "Market size, growth, and political stability", "Shipping costs", "Internal capital"], a: 1, e: "These are external factors making a country a lucrative target." },
+            { c: "Week 5", q: "What variables define 'Competitive Strength' in MACS?", o: ["GDP", "Brand awareness, local network, capital resources", "Tariffs", "Competitor prices"], a: 1, e: "Internal factors determining if the firm can actually win." },
+            { c: "Week 5", q: "What is 'Psychic Distance'?", o: ["Physical miles", "Perceived differences in culture, language, and business practices", "Currency gap", "Time zone difference"], a: 1, e: "SMEs prefer low psychic distance to reduce fear." },
+            { c: "Week 5", q: "What is the 'Opportunistic Approach' to market selection?", o: ["Complex algorithms", "Entering markets based on unsolicited orders or low psychic distance", "Hostile takeovers", "Always using FDI"], a: 1, e: "Used by SMEs who lack budget for full MACS screening." },
+            { c: "Week 5", q: "What is the Entry Mode risk/control continuum?", o: ["Low control equals high risk", "Higher control over a market requires higher financial risk", "Control is irrelevant", "Risk is fixed"], a: 1, e: "Exporting has no risk but no control; FDI has total control but massive risk." },
+            { c: "Week 5", q: "What is 'Indirect Exporting'?", o: ["Handling shipping internally", "Selling to a domestic intermediary who handles the foreign export", "Building a factory abroad", "Licensing IP"], a: 1, e: "Lowest risk mode; the intermediary takes the international risk." },
+            { c: "Week 5", q: "What is 'Licensing'?", o: ["Shipping goods directly", "Granting a foreign entity the right to use IP for a royalty fee", "Building a subsidiary", "A joint venture"], a: 1, e: "Monetizes patents without capital risk, but risks creating a competitor." },
+            { c: "Week 5", q: "How does 'Franchising' differ from Licensing?", o: ["Used only for physical products", "Parent pays local partner", "Includes strict operational rules and ongoing support", "Zero legal contracts"], a: 2, e: "McDonalds dictates exact cooking standards, not just the brand name." },
+            { c: "Week 5", q: "What defines a 'Joint Venture'?", o: ["Illegal under WTO", "Two companies sharing equity to create a new third corporate entity", "No shared risk", "One partner takes all profit"], a: 1, e: "Shared costs and knowledge, but high risk of management clashes." },
+            { c: "Week 5", q: "What is a 'Strategic Alliance'?", o: ["A Wholly Owned Subsidiary", "A new legal entity", "A contractual partnership that does NOT create a new legal entity", "Franchising"], a: 2, e: "Firms collaborate on a project while remaining independent." },
+            { c: "Week 5", q: "What is 'Foreign Direct Investment (FDI)'?", o: ["Exporting via intermediaries", "Buying or building physical facilities in the host country", "Licensing tech", "Selling shares"], a: 1, e: "Also known as a Wholly Owned Subsidiary; max control, max risk." },
+            { c: "Week 5", q: "What is a 'Greenfield Investment'?", o: ["Investing in eco-friendly tech", "A type of FDI building operations from scratch", "Buying an existing company", "Planting trees"], a: 1, e: "Offers a clean slate but takes years to build." },
+            { c: "Week 5", q: "According to TCA, when should a firm use FDI?", o: ["When small", "When the cost and risk of opportunistic behavior by external partners are too high", "When distance is zero", "When products are standard"], a: 1, e: "If partners might steal secrets, it's cheaper long-term to own it yourself." },
+            { c: "Week 5", q: "What defines a 'Born Global' firm?", o: ["Over 100 years old", "Targets international markets from its inception", "State-owned", "Uses only indirect export"], a: 1, e: "Tech startups that skip domestic growth and launch globally day one." },
+
+            // Week 7
+            { c: "Week 7", q: "In the communication model, what is 'Decoding'?", o: ["Creating the ad", "Translating to English", "How the consumer interprets the received message", "The media budget"], a: 2, e: "If decoded differently than intended, the campaign fails." },
+            { c: "Week 7", q: "In communication, what is 'Noise'?", o: ["Literal sounds only", "Advertising budget", "Cultural, linguistic, or competitive interference that distorts the message", "Consumer buying"], a: 2, e: "A bad translation or cultural faux pas acts as noise." },
+            { c: "Week 7", q: "Why use a 'Standardized' global ad campaign?", o: ["Local humor alignment", "Achieve economies of scale and consistent global identity", "Comply with local laws", "Appease local managers"], a: 1, e: "Saves millions in agency fees and unifies the brand." },
+            { c: "Week 7", q: "What is a 'Push' Strategy?", o: ["Mass media ads", "Trade shows, personal selling, and incentives to channel members", "Influencers", "Lobbying"], a: 1, e: "Motivating wholesalers/retailers to 'push' stock onto shelves." },
+            { c: "Week 7", q: "What is a 'Pull' Strategy?", o: ["Trade discounts", "Focusing heavily on mass media advertising to the end-consumer", "B2B sales", "Exporting"], a: 1, e: "Creating consumer desire so they 'pull' product through the channel." },
+            { c: "Week 7", q: "How does the legal environment impact communication?", o: ["Dictates product size", "Many countries ban ads for children, alcohol, or pharmaceuticals", "Controls language", "Bans internet"], a: 1, e: "A legal US commercial might be totally banned in the EU." },
+            { c: "Week 7", q: "What is 'Pattern Advertising'?", o: ["Geometric logos", "A global theme with localized execution", "Print only ads", "100% standardized commercial"], a: 1, e: "Core concept is the same, but local actors/voices are used." },
+            { c: "Week 7", q: "Why is literal language translation dangerous?", o: ["Idioms and cultural contexts do not translate literally", "Costs too much", "Illegal in EU", "Reduces noise"], a: 0, e: "'Finger lickin' good' translates poorly in China." },
+            { c: "Week 7", q: "How does literacy rate affect communication?", o: ["No effect", "Forces use of visual/audio channels instead of heavy text", "Increases print ads", "Lowers budgets"], a: 1, e: "In low-literacy areas, billboards and radio beat newspapers." },
+            { c: "Week 7", q: "What does HSBC's 'The World's Local Bank' represent?", o: ["Ethnocentric ad", "Glocalized communication strategy", "Price escalation", "Product standard"], a: 1, e: "Global strength combined with local sensitivity." },
+            { c: "Week 7", q: "What is the danger of international celebrity endorsements?", o: ["They charge too much", "A beloved US star might be unknown or disliked in Asia", "They refuse to travel", "It is a Push strategy"], a: 1, e: "Endorsements rarely cross borders perfectly." },
+            { c: "Week 7", q: "What is 'Adapted Communication'?", o: ["One ad for the world", "Customizing the ad to fit local humor, actors, and values", "Silent ads", "Radio only"], a: 1, e: "Required when a global message would be misunderstood." },
+            { c: "Week 7", q: "Can a firm standardize the product but adapt the communication?", o: ["No", "Yes, this is very common", "Only in B2B", "Only if forced by law"], a: 1, e: "Laughing Cow cheese is identical globally, but TV ads are heavily customized." },
+            { c: "Week 7", q: "What is the 'Sender' in the communication model?", o: ["The TV station", "The consumer", "The organization initiating the message", "The competitor"], a: 2, e: "The firm must encode the message properly." },
+            { c: "Week 7", q: "What represents 'Media Availability' in marketing?", o: ["Ad budgets", "Not all countries have the same internet or TV infrastructure", "Translation apps", "Government censors"], a: 1, e: "You cannot run a heavy YouTube campaign where internet is scarce." },
+
+            // Week 8
+            { c: "Week 8", q: "What is 'Price Escalation'?", o: ["Luxury branding", "Massive retail price increase of exports due to tariffs, shipping, and middlemen", "Domestic inflation", "Standardized prices"], a: 1, e: "Logistics and border costs multiply, making cheap items expensive abroad." },
+            { c: "Week 8", q: "What is 'Transfer Pricing'?", o: ["Bank FX fee", "Internal price charged between affiliated subsidiaries across borders", "Logistics cost", "Dumping"], a: 1, e: "Multinationals manipulate this to shift profits to low-tax countries." },
+            { c: "Week 8", q: "How do 'Grey Markets' form?", o: ["Counterfeiting", "Identical global pricing", "Large price discrepancies between countries allowing unauthorized arbitrage", "Government bans"], a: 2, e: "Smugglers buy cheap in one country and sell high in another." },
+            { c: "Week 8", q: "What is 'Geocentric Pricing'?", o: ["Universal global price", "Total local autonomy", "Strategic baseline global price with coordinated local adjustments", "Below cost pricing"], a: 2, e: "Balances local competitiveness while preventing severe Grey Market gaps." },
+            { c: "Week 8", q: "What is 'Market Skimming'?", o: ["Low initial price", "High initial price to target early adopters, then lowering it later", "Stripping features", "Tax evasion"], a: 1, e: "Used by tech firms to recoup R&D quickly." },
+            { c: "Week 8", q: "What is 'Market Penetration' Pricing?", o: ["High initial price", "Low initial price to rapidly capture massive market share", "Transfer pricing", "Luxury pricing"], a: 1, e: "Drives competitors away but sacrifices short-term profit." },
+            { c: "Week 8", q: "Why is 'Dumping' penalized by the WTO?", o: ["Creates Grey Markets", "Selling goods abroad below production cost to destroy local competitors", "Environmental damage", "Increases escalation"], a: 1, e: "It is a predatory monopoly tactic." },
+            { c: "Week 8", q: "How can a firm directly combat Price Escalation?", o: ["Raise home prices", "By manufacturing locally (FDI) to bypass tariffs and shipping", "Use Grey Markets", "Increase advertising"], a: 1, e: "Producing inside the target country eliminates border costs." },
+            { c: "Week 8", q: "What is 'Ethnocentric Pricing'?", o: ["Setting one universal global price based on the home country", "Letting locals decide", "Pricing based on rivals", "Dumping"], a: 0, e: "Often fails because it ignores local purchasing power." },
+            { c: "Week 8", q: "What is 'Polycentric Pricing'?", o: ["One price globally", "Allowing local managers total autonomy to set prices", "Baseline global price", "Government set pricing"], a: 1, e: "Maximizes local relevance but inevitably creates Grey Markets." },
+            { c: "Week 8", q: "How do Currency Exchange Rates affect pricing?", o: ["They don't", "If local currency crashes, profit margins disappear", "Increases tariffs", "Forces standardization"], a: 1, e: "Firms must constantly adjust prices or use hedging to survive volatility." },
+            { c: "Week 8", q: "What is 'Cost-Plus' pricing?", o: ["Adding a standard markup to the cost of manufacturing", "Pricing based on consumer demand", "Pricing below cost", "Skimming"], a: 0, e: "Simple, but ignores consumer willingness to pay." },
+            { c: "Week 8", q: "Why do governments scrutinize Transfer Pricing?", o: ["To protect consumers", "To prevent tax evasion by shifting profits to havens", "To stop dumping", "To encourage FDI"], a: 1, e: "Governments want tax revenue generated within their borders." },
+            { c: "Week 8", q: "What is a major risk of Penetration Pricing?", o: ["Attracts only luxury buyers", "Can trigger a destructive price war with local competitors", "Illegal everywhere", "Increases tariffs"], a: 1, e: "Competitors may drop their prices too, destroying industry profits." },
+            { c: "Week 8", q: "Why is Pricing unique in the marketing mix?", o: ["It generates revenue; the others generate costs", "It is the easiest to decide", "It cannot be changed", "It is ignored by consumers"], a: 0, e: "Pricing directly dictates profit margins and market positioning." },
+
+            // Week 9
+            { c: "Week 9", q: "Why is 'Secondary Data' the mandatory first step in research?", o: ["100% accurate always", "Fast, highly cost-effective, and readily available", "Primary is illegal", "Consumers prefer it"], a: 1, e: "Government reports provide a cheap overview, preventing obvious mistakes." },
+            { c: "Week 9", q: "What is a major limitation of Primary Data in foreign markets?", o: ["Incredibly expensive and time-consuming to collect", "Usually outdated", "Available to competitors", "Cannot be translated"], a: 0, e: "Custom cross-border surveys require massive budgets." },
+            { c: "Week 9", q: "What is 'Conceptual Equivalence'?", o: ["Equal survey costs", "Ensuring the underlying concept has the same meaning across cultures", "Identical sample sizes", "Same time zones"], a: 1, e: "If the concept (e.g. 'Family') differs, the data is useless." },
+            { c: "Week 9", q: "Why is random sampling difficult in emerging markets?", o: ["No consumers", "Lack of infrastructure (no addresses/low internet)", "Don't speak English", "Too much secondary data"], a: 1, e: "Without reliable census lists or internet, random sampling is nearly impossible." },
+            { c: "Week 9", q: "What is 'Social Desirability Bias'?", o: ["Refusing surveys", "Respondents answering favorably to look good to the researcher", "Altering data", "Using influencers"], a: 1, e: "People lie on surveys to look richer or healthier, skewing data." },
+            { c: "Week 9", q: "What is the primary purpose of Global Market Research?", o: ["To spend budgets", "Identify opportunities and mitigate financial risk of expansion", "Spy on employees", "Create grey markets"], a: 1, e: "Operating blindly in foreign markets almost guarantees failure." },
+            { c: "Week 9", q: "What is 'Observational Research'?", o: ["Reading reports", "Watching consumers interact with products in their natural environment", "Running algorithms", "Financial audits"], a: 1, e: "Useful when consumers are too polite to give negative feedback on a survey." },
+            { c: "Week 9", q: "How do you solve Translation Errors in surveys?", o: ["Google Translate", "Using Back-Translation", "Only English surveys", "Shorter surveys"], a: 1, e: "Translate A to B, then have someone else translate B to A to check accuracy." },
+            { c: "Week 9", q: "What is 'Quantitative' Research?", o: ["Data measured numerically", "Exploring underlying reasons", "Focus groups", "Interviews"], a: 0, e: "Surveys with 1-10 scales providing hard statistical numbers." },
+            { c: "Week 9", q: "What is 'Qualitative' Research?", o: ["Statistical data", "Data exploring underlying reasons and motivations", "Census reports", "Sales figures"], a: 1, e: "Focus groups providing rich, word-based insights." },
+            { c: "Week 9", q: "Why might focus groups fail in High Power Distance cultures?", o: ["They talk too much", "Subordinates won't speak up or disagree if a senior person is present", "No electricity", "Language barrier"], a: 1, e: "Strict social hierarchy stifles honest, open debate." },
+            { c: "Week 9", q: "What is a limitation of Secondary Data?", o: ["Too expensive", "May be outdated or lack specific relevance to the firm's exact problem", "Takes years to gather", "Illegal to use"], a: 1, e: "A census won't tell you if consumers like your specific new product." },
+            { c: "Week 9", q: "What is 'Primary Data'?", o: ["Government reports", "Original research collected specifically for the problem at hand", "Competitor filings", "Textbooks"], a: 1, e: "Surveys and focus groups designed exclusively for your firm." },
+            { c: "Week 9", q: "Why must legal privacy laws be researched before data collection?", o: ["They don't matter", "Data collection laws vary drastically (e.g. EU GDPR vs US laws)", "To pay tariffs", "To find translators"], a: 1, e: "Violating privacy laws results in massive fines." },
+            { c: "Week 9", q: "What is a 'Focus Group'?", o: ["A massive online survey", "A small group discussing a product guided by a moderator", "Secondary data", "A financial audit"], a: 1, e: "It provides deep qualitative insights into consumer feelings." },
+
+            // Cases & Trends
+            { c: "Case Studies", q: "Electrolux achieved 'Glocalization' by:", o: ["Online only sales", "Standardizing internal subsystems while adapting exterior designs", "Single global fridge", "Moving HQ to Asia"], a: 1, e: "The motor is identical globally to save money, but the doors change to match local tastes." },
+            { c: "Case Studies", q: "LEGO retained core manufacturing in-house to:", o: ["Buy cheap plastic", "Maintain strict precision, quality control, and brand prestige", "Avoid Asia", "Get tax breaks"], a: 1, e: "Outsourcing risked losing the vital interlocking precision of their bricks." },
+            { c: "Case Studies", q: "McCain switched to healthier sunflower oil in response to:", o: ["Political environment", "Technological environment", "Socio-Cultural environment", "Economic environment"], a: 2, e: "Growing public concern regarding obesity and nutrition forced adaptation." },
+            { c: "Case Studies", q: "Swiss Army successfully expanded into watches by leveraging:", o: ["Price Escalation", "Brand Equity and the COO Effect", "Direct Exporting", "Dumping"], a: 1, e: "Consumers trusted the knife's durability and assumed the 'Swiss Made' watch was exceptional." },
+            { c: "Case Studies", q: "What matrix did Bosch use to evaluate Middle East expansion?", o: ["PESTEL", "Porter's 5 Forces", "The MACS Matrix", "Value Chain"], a: 2, e: "They systematically scored market attractiveness against their competitive strength." },
+            { c: "Case Studies", q: "The danger highlighted in the E-Bikes in China case was:", o: ["Too much primary data", "Translating Western surveys without understanding local laws (speed/weight caps)", "Grey markets", "Currency crashes"], a: 1, e: "Western surveys were irrelevant because Chinese law made Western e-bikes illegal." },
+            { c: "Trends", q: "Deloitte's 'Agility' trend refers to:", o: ["Online stores", "Structural flexibility to rapidly change the marketing playbook", "Hiring athletes", "Agile software"], a: 1, e: "Post-pandemic, firms must be able to pivot messaging instantly." },
+            { c: "Trends", q: "Deloitte's 'Purpose' trend mandates organizations to:", o: ["Support all politics", "Know their core 'Why' beyond making a profit to guide decisions", "Standardize comms", "Eliminate humans"], a: 1, e: "Purpose acts as a North Star during market disruptions." },
+            { c: "Trends", q: "Deloitte's 'Trust' trend requires:", o: ["Low prices", "Demonstrating both intent (empathy) and competence to deliver", "Only intent", "Only competence"], a: 1, e: "Trust requires humanity plus the operational ability to get the job done." },
+            { c: "Trends", q: "Deloitte's 'Participation' trend means:", o: ["Passive buyers", "Moving consumers to active brand ambassadors and co-creators", "Voting for CEOs", "Ignoring feedback"], a: 1, e: "Inviting users to influence product development and narrative." },
+            { c: "Trends", q: "Deloitte's 'Fusion' trend involves:", o: ["Nuclear energy", "Creating new ecosystems via cross-industry partnerships", "Mergers only", "Standardizing products"], a: 1, e: "Breaking down traditional silos (e.g. Bank partnering with a health app)." },
+            { c: "Synthesis", q: "A UK hospitality brand settles foreign domain invoices in USDT. What risk are they hedging?", o: ["Political", "Technological", "Economic (Currency/Exchange) Risk", "Social"], a: 2, e: "Using stable digital currency protects against fiat currency devaluation." },
+            { c: "Synthesis", q: "A warehouse operative notices huge tariff costs on imported goods. What concept is this?", o: ["Transfer Pricing", "Price Escalation", "Market Skimming", "Dumping"], a: 1, e: "The practical reality of cross-border taxes multiplying the final cost." },
+            { c: "Synthesis", q: "What is the ultimate key to mastering International Strategic Marketing?", o: ["Memorizing terms", "Always standardizing", "Critically applying frameworks to balance global efficiencies with local cultural realities", "Relying on SRC"], a: 2, e: "Distinction-level mastery requires navigating the tension between scale and local relevance." },
+            { c: "Synthesis", q: "A tech company launches an AI platform globally on day one. They are a:", o: ["Joint Venture", "Born Global Firm", "Grey Market Operator", "Traditional MNE"], a: 1, e: "Tech firms often skip domestic growth and target the world immediately." }
+        ];
+
+        // --- GLOBAL APP CONTROLLER ---
+        function switchApp(appId) {
+            document.querySelectorAll('.app-view').forEach(app => app.classList.remove('active'));
+            document.getElementById(appId).classList.add('active');
+            
+            if (appId === 'view-vault') initVault();
+            if (appId === 'view-exam') switchExamScreen('exam-start');
+        }
+
+        function toggleGlobalTheme() {
+            const h = document.documentElement;
+            const newTheme = h.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            h.setAttribute('data-theme', newTheme);
+            
+            document.querySelectorAll('.theme-text').forEach(el => {
+                el.innerText = newTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+            });
+            // Update mobile emoji-only buttons
+            document.querySelectorAll('.btn-theme').forEach(btn => {
+                if(!btn.querySelector('span')) btn.innerText = newTheme === 'light' ? '🌙 Dark' : '☀️ Light';
+            });
+        }
+
+        // --- COURSE LOGIC ---
+        function navCourse(sectionId, el) {
+            document.querySelectorAll('.course-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('#course-nav .nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('course-week' + sectionId.replace('week','')).classList.add('active');
+            if(el) {
+                el.classList.add('active');
+                document.getElementById('course-title').innerText = el.innerText;
+            }
+            document.getElementById('course-sidebar').classList.remove('open');
+            document.getElementById('course-main').scrollTo(0,0);
+        }
+
+        // --- VAULT LOGIC ---
+        function initVault() {
+            renderVaultQs(MASTER_DB);
+            document.getElementById('vault-nav').children[0].classList.add('active');
+        }
+
+        function renderVaultQs(data) {
+            const grid = document.getElementById('vault-grid');
+            grid.innerHTML = '';
+            
+            if(data.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-size: 20px;">No questions found matching your search.</div>';
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'qa-card';
+                card.onclick = function() { if(document.getElementById('view-vault').classList.contains('study-mode')) this.classList.add('revealed'); };
+
+                // Extract the correct string answer from the options array using the index
+                const answerText = item.o[item.a];
+
+                card.innerHTML = `
+                    <div class="qa-header">
+                        <span class="qa-cat">${item.c}</span>
+                        <span style="color: var(--text-muted); font-weight: 800;">#${index + 1}</span>
+                    </div>
+                    <div class="qa-q">${item.q}</div>
+                    <div class="reveal-hint">👁️ Click to reveal answer</div>
+                    <div class="qa-body">
+                        <div class="qa-a">✓ ${answerText}</div>
+                        <div class="qa-e"><strong>The "Why":</strong> ${item.e}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            document.getElementById('vault-title').innerText = `${data.length} Questions Displayed`;
+        }
+
+        function filterVault(category, el) {
+            document.querySelectorAll('#vault-nav .nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('vault-search').value = '';
+
+            let filtered = MASTER_DB;
+            if (category !== 'All') {
+                filtered = MASTER_DB.filter(q => q.c.includes(category));
+            }
+            
+            renderVaultQs(filtered);
+            document.getElementById('vault-sidebar').classList.remove('open');
+            document.getElementById('view-vault').querySelector('.flex-col').scrollTo(0,0);
+        }
+
+        function searchVault() {
+            const term = document.getElementById('vault-search').value.toLowerCase();
+            document.querySelectorAll('#vault-nav .nav-item').forEach(n => n.classList.remove('active'));
+            
+            const filtered = MASTER_DB.filter(q => 
+                q.q.toLowerCase().includes(term) || 
+                q.o[q.a].toLowerCase().includes(term) || 
+                q.c.toLowerCase().includes(term) || 
+                q.e.toLowerCase().includes(term)
+            );
+            renderVaultQs(filtered);
+        }
+
+        function toggleStudyMode() {
+            const btn = document.getElementById('studyBtn');
+            const view = document.getElementById('view-vault');
+            
+            if (view.classList.contains('study-mode')) {
+                view.classList.remove('study-mode');
+                btn.style.background = 'var(--bg-card)'; btn.style.color = 'var(--secondary)';
+                btn.innerText = "🧠 Study Mode: OFF";
+                document.querySelectorAll('.qa-card').forEach(c => c.classList.remove('revealed'));
             } else {
-                html.setAttribute('data-theme', 'light');
-                span.innerHTML = '🌙 Dark Mode';
-                if(!btn.querySelector('span')) btn.innerHTML = '🌙';
+                view.classList.add('study-mode');
+                btn.style.background = 'var(--primary)'; btn.style.color = 'white';
+                btn.innerText = "🧠 Study Mode: ON";
             }
         }
-        
-        // Auto-adjust button text on tiny screens on load
-        window.addEventListener('resize', adjustThemeBtn);
-        window.addEventListener('load', adjustThemeBtn);
-        
-        function adjustThemeBtn() {
-            const btn = document.getElementById('themeBtn');
-            if(window.innerWidth <= 380) {
-                if(btn.innerHTML.includes('Light')) btn.innerHTML = '☀️';
-                if(btn.innerHTML.includes('Dark')) btn.innerHTML = '🌙';
-            } else {
-                const html = document.documentElement;
-                if (html.getAttribute('data-theme') === 'dark') {
-                    btn.innerHTML = '<span>☀️ Light Mode</span>';
-                } else {
-                    btn.innerHTML = '<span>🌙 Dark Mode</span>';
+
+
+        // --- EXAM LOGIC ---
+        let examQuestions = [];
+        let userAnswers = []; 
+        let currentQ = 0;
+        let timerInterval;
+        let timeLeft = 3600; 
+
+        function switchExamScreen(screenId) {
+            document.querySelectorAll('.exam-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById('view-exam').scrollTo(0,0);
+        }
+
+        function startExam() {
+            examQuestions = MASTER_DB.sort(() => Math.random() - 0.5).slice(0, 50);
+            userAnswers = new Array(50).fill(null);
+            currentQ = 0;
+            timeLeft = 3600;
+            switchExamScreen('exam-running');
+            startTimer();
+            loadExamQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerUI();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ Time is up! Your exam will now be submitted.");
+                    calculateExamResults();
                 }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            const d = document.getElementById('timerDisplay');
+            d.innerText = `${m}:${s}`;
+            d.style.color = (timeLeft <= 300) ? 'var(--danger)' : 'var(--primary)';
+        }
+
+        function loadExamQuestion() {
+            const q = examQuestions[currentQ];
+            document.getElementById('exam-cat').innerText = q.c;
+            document.getElementById('exam-counter').innerText = `Q ${currentQ + 1} / 50`;
+            document.getElementById('exam-q').innerText = q.q;
+            document.getElementById('exam-progress').style.width = ((currentQ + 1) / 50 * 100) + '%';
+
+            document.getElementById('btnPrev').disabled = (currentQ === 0);
+            const btnNext = document.getElementById('btnNext');
+            btnNext.disabled = (userAnswers[currentQ] === null); 
+            
+            if (currentQ === 49) {
+                btnNext.innerText = 'Submit Exam ✓';
+                btnNext.style.background = 'var(--success)';
+            } else {
+                btnNext.innerText = 'Next Question →';
+                btnNext.style.background = 'var(--primary)';
             }
+
+            const grid = document.getElementById('exam-opts');
+            grid.innerHTML = '';
+            
+            q.o.forEach((optText, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                if (userAnswers[currentQ] === index) btn.classList.add('selected'); 
+                
+                btn.innerHTML = `<div class="opt-l">${String.fromCharCode(65 + index)}</div><div>${optText}</div>`;
+                btn.onclick = () => {
+                    userAnswers[currentQ] = index; 
+                    document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById('btnNext').disabled = false; 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function prevQuestion() { if (currentQ > 0) { currentQ--; loadExamQuestion(); } }
+        function nextQuestion() { if (currentQ < 49) { currentQ++; loadExamQuestion(); } else { calculateExamResults(); } }
+        function forceSubmit() { if (confirm("Are you sure you want to submit your exam early?")) calculateExamResults(); }
+
+        function calculateExamResults() {
+            clearInterval(timerInterval);
+            switchExamScreen('exam-results');
+
+            let score = 0;
+            let mistakesByCategory = {};
+
+            examQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.a) score++;
+                else {
+                    let cat = q.c.split(':')[0];
+                    mistakesByCategory[cat] = (mistakesByCategory[cat] || 0) + 1;
+                }
+            });
+
+            const pct = Math.round((score / 50) * 100);
+            document.getElementById('exam-pct').innerText = pct + '%';
+            document.getElementById('exam-marks').innerText = `Marks: ${score} / 50`;
+            
+            const msg = document.getElementById('exam-msg');
+            if (pct >= 80) { msg.innerText = "🏆 Distinction Level! Outstanding."; msg.style.color = "var(--success)"; }
+            else if (pct >= 60) { msg.innerText = "⭐ Merit Level! Solid performance."; msg.style.color = "var(--warning)"; }
+            else { msg.innerText = "📖 Keep Studying! Review your mistakes below."; msg.style.color = "var(--danger)"; }
+
+            const diagList = document.getElementById('exam-diag');
+            diagList.innerHTML = '';
+            const sortedMistakes = Object.keys(mistakesByCategory).sort((a,b) => mistakesByCategory[b] - mistakesByCategory[a]);
+            
+            if (sortedMistakes.length > 0) {
+                sortedMistakes.slice(0, 4).forEach(cat => {
+                    diagList.innerHTML += `<li>❌ <strong style="color:var(--text-main);">${cat}</strong>: Missed ${mistakesByCategory[cat]} questions</li>`;
+                });
+            } else {
+                diagList.innerHTML = `<li>🎉 Flawless! You did not miss a single category.</li>`;
+            }
+
+            renderExamReview();
+        }
+
+        function renderExamReview() {
+            const container = document.getElementById('exam-review');
+            container.innerHTML = '';
+
+            examQuestions.forEach((q, i) => {
+                const userChoice = userAnswers[i];
+                const isCorrect = (userChoice === q.a);
+                const isUnanswered = (userChoice === null);
+
+                const card = document.createElement('div');
+                card.className = `rev-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+                let html = `<div style="font-size: 18px; font-weight: 800; color: var(--secondary); margin-bottom: 15px;">Q${i+1}. ${q.q}</div>`;
+                
+                if (isCorrect) {
+                    html += `<div style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700;">✓ Your Answer: ${q.o[userChoice]}</div>`;
+                } else if (isUnanswered) {
+                    html += `<div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700;">❌ You left this blank.</div>`;
+                    html += `<div style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px dashed var(--success); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700;">✓ Correct Answer: ${q.o[q.a]}</div>`;
+                } else {
+                    html += `<div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700;">❌ Your Answer: ${q.o[userChoice]}</div>`;
+                    html += `<div style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px dashed var(--success); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 700;">✓ Correct Answer: ${q.o[q.a]}</div>`;
+                }
+
+                html += `<div style="background: var(--bg-main); padding: 15px; border-radius: 8px; font-size: 15px; color: var(--text-muted); margin-top: 15px; border: 1px solid var(--border);"><strong style="color:var(--primary);">The "Why":</strong> ${q.e}</div>`;
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
         }
     </script>
 </body>
